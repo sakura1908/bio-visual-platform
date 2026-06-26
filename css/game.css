@@ -1,0 +1,552 @@
+/* ===== 游戏化系统样式 ===== */
+
+/* 游戏状态栏 */
+.game-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1000;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.xp-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    max-width: 300px;
+}
+
+.level-icon {
+    font-size: 1.5rem;
+}
+
+.xp-progress {
+    flex: 1;
+    height: 12px;
+    background: var(--bg-hover);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+.xp-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    min-width: 60px;
+}
+
+.badges-display {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.badge-btn {
+    background: var(--bg-hover);
+    border: none;
+    color: var(--text-primary);
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s;
+}
+
+.badge-btn:hover {
+    background: var(--accent-purple);
+}
+
+.audio-toggle {
+    background: var(--bg-hover);
+    border: none;
+    color: var(--text-primary);
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+}
+
+.audio-toggle:hover {
+    background: var(--accent-cyan);
+}
+
+.audio-toggle.muted {
+    opacity: 0.5;
+}
+
+/* 徽章弹窗 */
+.badges-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+.badges-modal.show {
+    display: flex;
+}
+
+.badges-content {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.badges-content h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 15px;
+}
+
+.badge-item {
+    background: var(--bg-hover);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+
+.badge-item.earned {
+    border-color: var(--accent-green);
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.badge-item.locked {
+    opacity: 0.5;
+    filter: grayscale(1);
+}
+
+.badge-item .badge-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.badge-item .badge-name {
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.badge-item .badge-req {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.close-btn {
+    display: block;
+    margin: 25px auto 0;
+    background: var(--accent-green);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.close-btn:hover {
+    transform: scale(1.05);
+}
+
+/* 徽章获得动画 */
+.badge-earned {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3000;
+    animation: badgePopIn 0.5s ease;
+}
+
+@keyframes badgePopIn {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    50% { transform: translate(-50%, -50%) scale(1.2); }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.badge-earned-content {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    padding: 40px 60px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(139, 92, 246, 0.5);
+}
+
+.badge-earned-content .badge-icon {
+    font-size: 5rem;
+    display: block;
+    margin-bottom: 15px;
+    animation: bounce 0.5s ease infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10px); }
+}
+
+.badge-earned-content .badge-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+/* 进度提示 */
+.progress-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--bg-card);
+    padding: 15px 25px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: var(--shadow);
+    z-index: 1500;
+    animation: slideIn 0.3s ease;
+    border-left: 4px solid var(--accent-green);
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.progress-toast .toast-icon {
+    font-size: 1.5rem;
+}
+
+.progress-toast .toast-text {
+    font-size: 0.9rem;
+}
+
+.progress-toast .toast-xp {
+    color: var(--accent-green);
+    font-weight: bold;
+}
+
+/* XP 获得动画 */
+.xp-gain {
+    position: fixed;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--accent-green);
+    pointer-events: none;
+    animation: xpFloat 1s ease forwards;
+    z-index: 1500;
+}
+
+@keyframes xpFloat {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-50px); }
+}
+
+/* 成就完成提示 */
+.achievement-complete {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+    color: white;
+    padding: 15px 25px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 5px 20px rgba(34, 197, 94, 0.4);
+    z-index: 1500;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+.achievement-complete .ach-icon {
+    font-size: 1.5rem;
+}
+
+/* 游戏按钮样式增强 */
+.game-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.game-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.game-btn:active::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* 等级提升特效 */
+.level-up-effect {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(34, 197, 94, 0.2);
+    z-index: 2500;
+    animation: flashIn 0.5s ease;
+    pointer-events: none;
+}
+
+@keyframes flashIn {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+.level-up-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 3px solid var(--accent-green);
+    padding: 50px;
+    border-radius: 24px;
+    text-align: center;
+    z-index: 3000;
+    box-shadow: 0 0 100px rgba(34, 197, 94, 0.5);
+    animation: modalPop 0.5s ease;
+}
+
+@keyframes modalPop {
+    0% { transform: translate(-50%, -50%) scale(0); }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.level-up-modal .new-level {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.level-up-modal h2 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: var(--accent-green);
+}
+
+.level-up-modal p {
+    color: var(--text-secondary);
+    margin-bottom: 25px;
+}
+
+/* 进度条样式 */
+.progress-ring {
+    width: 60px;
+    height: 60px;
+}
+
+.progress-ring circle {
+    fill: none;
+    stroke-width: 6;
+}
+
+.progress-ring .bg {
+    stroke: var(--bg-hover);
+}
+
+.progress-ring .progress {
+    stroke: var(--accent-green);
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+/* 星星评分 */
+.star-rating {
+    display: flex;
+    gap: 5px;
+}
+
+.star {
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.star:hover {
+    transform: scale(1.2);
+}
+
+.star.filled {
+    color: #fbbf24;
+}
+
+.star.empty {
+    color: var(--bg-hover);
+}
+
+/* 游戏内成就提示 */
+.ingame-achievement {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    padding: 15px 30px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: var(--shadow);
+    z-index: 1500;
+    border: 2px solid var(--accent-purple);
+    animation: dropDown 0.5s ease;
+}
+
+@keyframes dropDown {
+    from { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+.ingame-achievement .ach-badge {
+    font-size: 2rem;
+}
+
+.ingame-achievement .ach-info h4 {
+    color: var(--accent-purple);
+    margin-bottom: 2px;
+}
+
+.ingame-achievement .ach-info p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* 每日任务 */
+.daily-quest {
+    background: var(--bg-card);
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.quest-icon {
+    font-size: 2rem;
+}
+
+.quest-info {
+    flex: 1;
+}
+
+.quest-info h4 {
+    margin-bottom: 3px;
+}
+
+.quest-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-hover);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar .fill {
+    height: 100%;
+    background: var(--accent-green);
+    transition: width 0.3s ease;
+}
+
+.quest-reward {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--accent-green);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .game-bar {
+        padding: 8px 10px;
+    }
+    
+    .xp-bar {
+        max-width: 150px;
+    }
+    
+    .xp-text {
+        display: none;
+    }
+    
+    .badge-btn span {
+        display: none;
+    }
+    
+    .badges-content {
+        padding: 20px;
+    }
+    
+    .badges-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .badge-earned-content {
+        padding: 30px 40px;
+    }
+    
+    .level-up-modal {
+        padding: 30px;
+        width: 90%;
+    }
+}
