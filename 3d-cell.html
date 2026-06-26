@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 细胞模型 · 生物可视化平台</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1a2744 50%, #0f172a 100%);
+            color: #f1f5f9; overflow: hidden; height: 100vh;
+        }
+
+        /* ===== 信息面板 ===== */
+        #panel {
+            position: fixed; top:20px; left:20px;
+            background: rgba(15,23,42,0.94); backdrop-filter: blur(14px);
+            padding: 20px 24px; border-radius: 16px;
+            min-width: 280px; max-width: 340px;
+            border: 1px solid rgba(34,197,94,0.35);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 100;
+            transition: border-color 0.3s;
+        }
+        #panel.highlight { border-color: rgba(34,197,94,0.85); }
+        #panel h2 { color: #4ade80; font-size:1.25rem; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+        #panel .sub { color: #94a3b8; font-size:0.85rem; margin-bottom:14px; }
+        #panel .info { color: #cbd5e1; line-height:1.8; font-size:0.93rem; }
+        #panel .info strong { color: #4ade80; font-size:1.05rem; display:block; margin-bottom:6px; }
+        #panel .info .detail { color: #94a3b8; font-size:0.88rem; margin-top:8px; padding-top:8px; border-top:1px solid rgba(34,197,94,0.2); }
+
+        /* 部件列表 */
+        #part-list { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .part-tag {
+            padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;
+            border: 1px solid rgba(255,255,255,0.15); cursor: pointer;
+            transition: all 0.2s; color: #94a3b8;
+        }
+        .part-tag:hover { border-color: rgba(34,197,94,0.6); color: #4ade80; }
+        .part-tag.active { background: rgba(34,197,94,0.2); border-color: #4ade80; color: #4ade80; }
+
+        /* ===== 底部按钮 ===== */
+        #btns { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); display:flex; gap:12px; z-index:100; flex-wrap:wrap; justify-content:center; }
+        .btn { padding:11px 24px; border-radius:28px; border:none; font-size:0.95rem; font-weight:600; cursor:pointer; transition:all 0.25s; font-family:inherit; }
+        .btn-pri { background:linear-gradient(135deg,#22c55e,#16a34a); color:white; box-shadow:0 4px 18px rgba(34,197,94,0.45); }
+        .btn-pri:hover { transform:scale(1.06); box-shadow:0 6px 24px rgba(34,197,94,0.6); }
+        .btn-sec { background:rgba(71,85,105,0.9); color:#e2e8f0; }
+        .btn-sec:hover { background:rgba(100,116,139,0.9); transform:scale(1.04); }
+        .btn-home { background:rgba(30,41,59,0.9); color:#94a3b8; border:1px solid rgba(255,255,255,0.15); }
+        .btn-home:hover { color:#f1f5f9; border-color:rgba(255,255,255,0.3); }
+
+        /* ===== 操作提示 ===== */
+        #tip {
+            position:fixed; bottom:82px; left:50%; transform:translateX(-50%);
+            color:#475569; font-size:0.82rem; z-index:100;
+            background: rgba(15,23,42,0.7); padding:6px 16px; border-radius:20px;
+            backdrop-filter: blur(8px);
+        }
+
+        /* ===== 悬浮标签 ===== */
+        #label {
+            position:fixed; background:rgba(0,0,0,0.9); color:#f0fdf4;
+            padding:7px 16px; border-radius:18px; font-size:0.92rem; font-weight:600;
+            pointer-events:none; white-space:nowrap; border:1.5px solid #22c55e;
+            display:none; z-index:200; box-shadow:0 2px 12px rgba(0,0,0,0.5);
+            transition: opacity 0.15s;
+        }
+
+        /* ===== 加载屏 ===== */
+        #loading {
+            position:fixed; inset:0; background:#0f172a;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            z-index:9999; transition: opacity 0.6s;
+        }
+        .spinner {
+            width:54px; height:54px;
+            border:4px solid rgba(34,197,94,0.12);
+            border-top-color:#22c55e;
+            border-radius:50%; animation:spin 0.85s linear infinite; margin-bottom:22px;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        #loading p { color:#94a3b8; font-size:1.1rem; }
+        #loading .sub { color:#475569; font-size:0.85rem; margin-top:10px; }
+
+        /* ===== 细胞切换动画 ===== */
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        .fade-in { animation: fadeIn 0.5s ease; }
+
+        /* ===== 信息弹出动画 ===== */
+        @keyframes slideUp {
+            from { opacity:0; transform:translateY(8px); }
+            to { opacity:1; transform:translateY(0); }
+        }
+        .slide-up { animation: slideUp 0.3s ease; }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 480px) {
+            #panel { max-width: 220px; padding: 14px 16px; font-size: 0.85rem; }
+            #panel h2 { font-size: 1rem; }
+            #btns { bottom: 16px; gap: 8px; }
+            .btn { padding: 9px 16px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 加载屏 -->
+<div id="loading">
+    <div class="spinner"></div>
+    <p>正在加载 3D 引擎...</p>
+    <p class="sub">Three.js 本地加载，无需联网</p>
+</div>
+
+<!-- 信息面板 -->
+<div id="panel">
+    <h2>🔬 <span id="cell-title">植物细胞</span></h2>
+    <div class="sub" id="panel-sub">点击细胞部件查看详情</div>
+    <div class="info" id="info-text">
+        🖱️ 左键拖拽旋转<br>
+        🖱️ 滚轮缩放<br>
+        👆 点击部件查看详情<br>
+        📱 手机双指缩放 / 单指旋转
+    </div>
+    <div id="part-list"></div>
+</div>
+
+<!-- 提示文字 -->
+<div id="tip">左键拖拽旋转 · 滚轮缩放 · 点击部件查看详情</div>
+
+<!-- 底部按钮 -->
+<div id="btns">
+    <button class="btn btn-home" onclick="goHome()">← 返回主页</button>
+    <button class="btn btn-pri" id="btn-toggle" onclick="toggleCell()">🔄 切换为动物细胞</button>
+    <button class="btn btn-sec" onclick="resetView()">🎯 重置视角</button>
+</div>
+
+<!-- 悬浮标签 -->
+<div id="label"></div>
+
+<!-- Three.js 本地文件 -->
+<script src="three.min.js"></script>
+<script>
+// ============================================================
+// OrbitControls（精简版，支持鼠标和触摸）
+// ============================================================
+class OrbitControls {
+    constructor(camera, domElement) {
+        this.camera = camera;
+        this.domElement = domElement;
+        this.target = new THREE.Vector3(0,0,0);
+        this.enableDamping = true;
+        this.dampingFactor = 0.08;
+        this.minDistance = 3;
+        this.maxDistance = 14;
+        this.autoRotate = true;
+        this.autoRotateSpeed = 0.5;
+        this.theta = 0;
+        this.phi = Math.PI / 2 - 0.25;
+        this.radius = 7;
+        this.isDragging = false;
+        this.lastX = 0;
+        this.lastY = 0;
+        this._lastPinchDist = 0;
+        this.init();
+        this.update();
+    }
+
+    init() {
+        const el = this.domElement;
+
+        // ===== 鼠标事件 =====
+        el.addEventListener('mousedown', (e) => {
+            this.isDragging = true;
+            this.lastX = e.clientX;
+            this.lastY = e.clientY;
+            this.autoRotate = false;
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!this.isDragging) return;
+            const dx = e.clientX - this.lastX;
+            const dy = e.clientY - this.lastY;
+            this.theta -= dx * 0.007;
+            this.phi -= dy * 0.007;
+            this.phi = Math.max(0.08, Math.min(Math.PI - 0.08, this.phi));
+            this.lastX = e.clientX;
+            this.lastY = e.clientY;
+        });
+        window.addEventListener('mouseup', () => {
+            this.isDragging = false;
+            setTimeout(() => { this.autoRotate = true; }, 2000);
+        });
+        el.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            this.radius += e.deltaY * 0.008;
+            this.radius = Math.max(this.minDistance, Math.min(this.maxDistance, this.radius));
+        }, { passive: false });
+
+        // ===== 触摸事件（手机支持）=====
+        let touchStart = null;
+        el.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                this.isDragging = true;
+                this.lastX = e.touches[0].clientX;
+                this.lastY = e.touches[0].clientY;
+                this.autoRotate = false;
+                touchStart = null;
+            } else if (e.touches.length === 2) {
+                this.isDragging = false;
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                this._lastPinchDist = Math.sqrt(dx*dx + dy*dy);
+                touchStart = null;
+            }
+        }, { passive: true });
+
+        el.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (e.touches.length === 1 && this.isDragging) {
+                const dx = e.touches[0].clientX - this.lastX;
+                const dy = e.touches[0].clientY - this.lastY;
+                this.theta -= dx * 0.007;
+                this.phi -= dy * 0.007;
+                this.phi = Math.max(0.08, Math.min(Math.PI - 0.08, this.phi));
+                this.lastX = e.touches[0].clientX;
+                this.lastY = e.touches[0].clientY;
+            } else if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                const delta = this._lastPinchDist - dist;
+                this.radius += delta * 0.02;
+                this.radius = Math.max(this.minDistance, Math.min(this.maxDistance, this.radius));
+                this._lastPinchDist = dist;
+            }
+        }, { passive: false });
+
+        el.addEventListener('touchend', () => {
+            this.isDragging = false;
+            setTimeout(() => { this.autoRotate = true; }, 2000);
+        }, { passive: true });
+    }
+
+    update() {
+        if (this.autoRotate) {
+            this.theta += 0.001 * this.autoRotateSpeed;
+        }
+        const x = this.radius * Math.sin(this.phi) * Math.cos(this.theta);
+        const y = this.radius * Math.cos(this.phi);
+        const z = this.radius * Math.sin(this.phi) * Math.sin(this.theta);
+        this.camera.position.set(
+            x + this.target.x,
+            y + this.target.y,
+            z + this.target.z
+        );
+        this.camera.lookAt(this.target);
+    }
+}
+
+// ============================================================
+// 细胞数据（扩充 + 修复位置分布）
+// ============================================================
+const CELL_DATA = {
+    plant: [
+        {
+            name: '细胞壁',
+            color: 0x86efac, r: 2.4, pos: [0,0,0],
+            isWireframe: true,
+            info: '植物细胞特有结构，由纤维素组成，厚而坚硬，负责支持和保护细胞，维持细胞形态。',
+            emoji: '🟢'
+        },
+        {
+            name: '细胞膜',
+            color: 0x93c5fd, r: 2.05, pos: [0,0,0],
+            isTransparent: true, opacity: 0.22,
+            info: '由磷脂双分子层和蛋白质组成，控制物质进出细胞的选择性通透膜，具有流动性。',
+            emoji: '🔵'
+        },
+        {
+            name: '细胞质',
+            color: 0xfef08a, r: 1.85, pos: [0,0,0],
+            isTransparent: true, opacity: 0.08,
+            info: '细胞膜以内、细胞核以外的所有生活物质，是细胞代谢的主要场所，含有各种细胞器。',
+            emoji: '🟡'
+        },
+        {
+            name: '细胞核',
+            color: 0xf59e0b, r: 0.52, pos: [0.3, 0.55, 0.2],
+            info: '细胞的"控制中心"，内含 DNA 遗传信息，调控细胞代谢与遗传。',
+            emoji: '🟠'
+        },
+        {
+            name: '叶绿体',
+            color: 0x16a34a, r: 0.2, pos: [-0.5, 0.3, 0.4],
+            cnt: 8, spread: 1.1,
+            info: '植物细胞特有，含叶绿素，是光合作用的场所，能将光能转化为化学能（ATP）。',
+            emoji: '🟢'
+        },
+        {
+            name: '液泡',
+            color: 0x22d3ee, r: 0.82, pos: [-0.2, -0.5, -0.15],
+            isTransparent: true, opacity: 0.55,
+            info: '占植物细胞体积的 90%，内含细胞液，储存水分、营养物质，调节渗透压和细胞膨胀。',
+            emoji: '🔵'
+        },
+        {
+            name: '线粒体',
+            color: 0xf87171, r: 0.16, pos: [0.65, -0.3, 0.5],
+            cnt: 6, spread: 1.3,
+            info: '细胞能量工厂，进行有氧呼吸，分解有机物产生 ATP，为细胞一切生命活动供能。',
+            emoji: '🔴'
+        },
+        {
+            name: '内质网',
+            color: 0x2dd4bf, r: 0.35, pos: [0.5, 0.1, -0.5],
+            isTransparent: true, opacity: 0.5,
+            info: '膜状管道系统，分粗面内质网（合成分泌蛋白）和滑面内质网（合成脂质）。',
+            emoji: '🔵'
+        },
+        {
+            name: '高尔基体',
+            color: 0xe879f9, r: 0.25, pos: [0.6, 0.5, -0.35],
+            cnt: 3, spread: 0.4,
+            info: '蛋白质的"加工包装中心"，对内质网合成的蛋白质加工修饰，再分类运输到目标位置。',
+            emoji: '🟣'
+        }
+    ],
+    animal: [
+        {
+            name: '细胞膜',
+            color: 0x93c5fd, r: 2.0, pos: [0,0,0],
+            isTransparent: true, opacity: 0.25,
+            info: '由磷脂双分子层和蛋白质组成，控制物质进出细胞，维持细胞内环境稳定。',
+            emoji: '🔵'
+        },
+        {
+            name: '细胞质',
+            color: 0xfde68a, r: 1.82, pos: [0,0,0],
+            isTransparent: true, opacity: 0.08,
+            info: '细胞膜内除细胞核之外的部分，含有各种细胞器，是细胞代谢的重要场所。',
+            emoji: '🟡'
+        },
+        {
+            name: '细胞核',
+            color: 0xf59e0b, r: 0.55, pos: [0.2, 0.5, 0.15],
+            info: '细胞的控制中心，内含 DNA 遗传信息，调控细胞代谢、生长和分裂。',
+            emoji: '🟠'
+        },
+        {
+            name: '线粒体',
+            color: 0xf87171, r: 0.17, pos: [0.7, -0.2, 0.5],
+            cnt: 8, spread: 1.4,
+            info: '细胞能量工厂，进行有氧呼吸产生 ATP。动物细胞比植物细胞含有更多线粒体。',
+            emoji: '🔴'
+        },
+        {
+            name: '核糖体',
+            color: 0xa78bfa, r: 0.1, pos: [-0.5, 0.3, -0.4],
+            cnt: 14, spread: 1.5,
+            info: '蛋白质合成的场所，没有膜结构，由 rRNA 和蛋白质组成，广泛分布于细胞质中。',
+            emoji: '🟣'
+        },
+        {
+            name: '内质网',
+            color: 0x14b8a6, r: 0.38, pos: [-0.6, -0.4, 0.3],
+            isTransparent: true, opacity: 0.45,
+            info: '膜状管道网络，粗面内质网上附着核糖体合成蛋白质，滑面内质网合成脂质。',
+            emoji: '🔵'
+        },
+        {
+            name: '高尔基体',
+            color: 0xe879f9, r: 0.24, pos: [0.5, 0.55, -0.3],
+            cnt: 3, spread: 0.4,
+            info: '对内质网合成的蛋白质进行加工、分类和包装，再运输到特定位置（细胞膜或分泌出细胞）。',
+            emoji: '🟣'
+        },
+        {
+            name: '溶酶体',
+            color: 0xfb923c, r: 0.15, pos: [-0.7, 0.6, 0.2],
+            cnt: 5, spread: 0.8,
+            info: '动物细胞特有，含有多种水解酶，负责分解衰老的细胞器和摄入的颗粒物，是细胞"清洁工"。',
+            emoji: '🟠'
+        },
+        {
+            name: '中心体',
+            color: 0xfde68a, r: 0.13, pos: [0.0, 0.7, 0.6],
+            cnt: 2, spread: 0.2,
+            info: '动物细胞和低等植物细胞特有，参与有丝分裂时纺锤体的形成，决定细胞分裂方向。',
+            emoji: '🟡'
+        }
+    ]
+};
+
+// ============================================================
+// 主程序变量
+// ============================================================
+let scene, camera, renderer, controls;
+let cellType = 'plant';
+let cellParts = [];      // 所有可交互的 mesh（不含线框和轮廓）
+let raycaster, mouse;
+let hoveredPart = null;
+let activePart = null;
+
+// ============================================================
+// 初始化
+// ============================================================
+function init() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0d1628);
+    scene.fog = new THREE.FogExp2(0x0d1628, 0.045);
+
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 1.5, 7);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    // 灯光
+    scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+
+    const sun = new THREE.DirectionalLight(0xffffff, 1.1);
+    sun.position.set(6, 8, 5);
+    sun.castShadow = true;
+    scene.add(sun);
+
+    const fill = new THREE.PointLight(0x22c55e, 0.55, 30);
+    fill.position.set(-4, 3, 3);
+    scene.add(fill);
+
+    const rim = new THREE.PointLight(0x60a5fa, 0.35, 25);
+    rim.position.set(3, -3, -4);
+    scene.add(rim);
+
+    // 背景粒子
+    createStars();
+
+    // 控制器
+    controls = new OrbitControls(camera, renderer.domElement);
+
+    // 射线检测
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
+
+    // 创建细胞
+    createCell();
+
+    // 更新标签列表
+    updatePartList();
+
+    // 事件监听
+    window.addEventListener('click', onClick);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('resize', onResize);
+
+    // 隐藏加载屏
+    setTimeout(() => {
+        const ld = document.getElementById('loading');
+        ld.style.opacity = '0';
+        setTimeout(() => { ld.style.display = 'none'; }, 600);
+    }, 500);
+
+    animate();
+}
+
+// ============================================================
+// 背景粒子（星空效果）
+// ============================================================
+function createStars() {
+    const geo = new THREE.BufferGeometry();
+    const count = 600;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count * 3; i++) {
+        positions[i] = (Math.random() - 0.5) * 60;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const mat = new THREE.PointsMaterial({ color: 0x334155, size: 0.06 });
+    scene.add(new THREE.Points(geo, mat));
+}
+
+// ============================================================
+// 创建细胞模型
+// ============================================================
+function createCell() {
+    // 清除旧模型
+    while (scene.children.length > 0) {
+        const obj = scene.children[0];
+        // 保留灯光和粒子
+        if (obj.isLight || obj.isPoints) { scene.children.push(scene.children.shift()); break; }
+        scene.remove(obj);
+    }
+    // 重新清理（更稳健的方式）
+    const toRemove = scene.children.filter(o => o.isMesh);
+    toRemove.forEach(o => scene.remove(o));
+    cellParts = [];
+
+    const items = CELL_DATA[cellType];
+
+    items.forEach((item) => {
+        const cnt = item.cnt || 1;
+        const spread = item.spread || 0;
+
+        for (let i = 0; i < cnt; i++) {
+            const geo = new THREE.SphereGeometry(item.r, 36, 36);
+            let mat;
+
+            if (item.isWireframe) {
+                // 细胞壁：线框，MeshBasicMaterial（无 emissive）
+                mat = new THREE.MeshBasicMaterial({
+                    color: item.color,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.3
+                });
+            } else if (item.isTransparent) {
+                mat = new THREE.MeshPhongMaterial({
+                    color: item.color,
+                    transparent: true,
+                    opacity: item.opacity,
+                    shininess: 40,
+                    specular: new THREE.Color(0x444444),
+                    side: THREE.DoubleSide,
+                    depthWrite: false
+                });
+            } else {
+                mat = new THREE.MeshStandardMaterial({
+                    color: item.color,
+                    roughness: 0.3,
+                    metalness: 0.05,
+                    envMapIntensity: 1.0
+                });
+            }
+
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.castShadow = !item.isTransparent;
+
+            // 计算位置（cnt > 1 时均匀分布在球面上）
+            if (cnt > 1) {
+                // 黄金角分布，均匀散布
+                const goldenAngle = 2.39996; // 2π / φ²
+                const inclination = Math.acos(1 - 2 * (i + 0.5) / cnt);
+                const azimuth = goldenAngle * i;
+                const r = spread;
+                mesh.position.set(
+                    (item.pos[0] || 0) + r * Math.sin(inclination) * Math.cos(azimuth) + (Math.random() - 0.5) * 0.12,
+                    (item.pos[1] || 0) + r * Math.cos(inclination) + (Math.random() - 0.5) * 0.1,
+                    (item.pos[2] || 0) + r * Math.sin(inclination) * Math.sin(azimuth) + (Math.random() - 0.5) * 0.12
+                );
+            } else {
+                mesh.position.set(item.pos[0] || 0, item.pos[1] || 0, item.pos[2] || 0);
+            }
+
+            // 存储元数据
+            mesh.userData = {
+                name: item.name,
+                info: item.info,
+                emoji: item.emoji,
+                color: item.color,
+                isWireframe: !!item.isWireframe,
+                isTransparent: !!item.isTransparent
+            };
+
+            scene.add(mesh);
+
+            // 只有非线框、非高度透明的 mesh 才加入可点击列表
+            if (!item.isWireframe) {
+                cellParts.push(mesh);
+            }
+
+            // 卡通轮廓（仅实体非透明部件）
+            if (!item.isWireframe && !item.isTransparent && cnt === 1) {
+                const og = new THREE.SphereGeometry(item.r * 1.06, 36, 36);
+                const om = new THREE.MeshBasicMaterial({
+                    color: 0x000000,
+                    side: THREE.BackSide
+                });
+                const ol = new THREE.Mesh(og, om);
+                ol.position.copy(mesh.position);
+                scene.add(ol);
+            }
+        }
+    });
+}
+
+// ============================================================
+// 更新底部部件标签列表
+// ============================================================
+function updatePartList() {
+    const list = document.getElementById('part-list');
+    if (!list) return;
+    list.innerHTML = '';
+    const seen = new Set();
+    CELL_DATA[cellType].forEach((item) => {
+        if (seen.has(item.name)) return;
+        seen.add(item.name);
+        const tag = document.createElement('span');
+        tag.className = 'part-tag';
+        tag.textContent = item.emoji + ' ' + item.name;
+        tag.onclick = () => focusPart(item.name);
+        list.appendChild(tag);
+    });
+}
+
+// ============================================================
+// 点击部件标签 → 定位到对应 mesh
+// ============================================================
+function focusPart(name) {
+    const mesh = cellParts.find(m => m.userData.name === name);
+    if (!mesh) return;
+    showPartInfo(mesh);
+    // 高亮标签
+    document.querySelectorAll('.part-tag').forEach(t => {
+        t.classList.toggle('active', t.textContent.includes(name));
+    });
+}
+
+// ============================================================
+// 显示部件信息
+// ============================================================
+function showPartInfo(obj) {
+    activePart = obj;
+    const panel = document.getElementById('panel');
+    const infoEl = document.getElementById('info-text');
+
+    infoEl.className = 'info slide-up';
+    infoEl.innerHTML =
+        `<strong>${obj.userData.emoji} ${obj.userData.name}</strong>` +
+        `${obj.userData.info}` +
+        `<div class="detail">点击其他部件继续探索，或点击下方标签快速定位</div>`;
+
+    panel.classList.add('highlight');
+    setTimeout(() => panel.classList.remove('highlight'), 800);
+
+    // 弹跳动画
+    if (!obj.userData.isTransparent) {
+        const s = obj.scale.clone();
+        obj.scale.setScalar(s.x * 1.35);
+        setTimeout(() => obj.scale.copy(s), 220);
+    }
+}
+
+// ============================================================
+// 鼠标移动：悬浮高亮
+// ============================================================
+function onMouseMove(e) {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+
+    const hits = raycaster.intersectObjects(cellParts, false);
+
+    // 清除旧高亮
+    if (hoveredPart && !hoveredPart.userData.isWireframe) {
+        // MeshStandardMaterial / MeshPhongMaterial 都有 emissive
+        if (hoveredPart.material.emissive) {
+            hoveredPart.material.emissive.set(0x000000);
+        }
+        hoveredPart = null;
+    }
+    document.getElementById('label').style.display = 'none';
+    document.body.style.cursor = 'default';
+
+    if (hits.length > 0) {
+        const obj = hits[0].object;
+        // ✅ 修复：只对有 emissive 的材质设置高亮
+        if (obj.material.emissive) {
+            obj.material.emissive.set(0x1a1a1a);
+        }
+        document.body.style.cursor = 'pointer';
+
+        const lb = document.getElementById('label');
+        lb.textContent = '👉 ' + obj.userData.name;
+        lb.style.display = 'block';
+        lb.style.left = (e.clientX + 18) + 'px';
+        lb.style.top  = (e.clientY - 18) + 'px';
+
+        hoveredPart = obj;
+    }
+}
+
+// ============================================================
+// 鼠标点击：显示详情
+// ============================================================
+function onClick(e) {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+
+    const hits = raycaster.intersectObjects(cellParts, false);
+    if (hits.length > 0) {
+        const obj = hits[0].object;
+        showPartInfo(obj);
+
+        // 同步标签高亮
+        document.querySelectorAll('.part-tag').forEach(t => {
+            t.classList.toggle('active', t.textContent.includes(obj.userData.name));
+        });
+
+        // 发光闪烁
+        if (obj.material.emissive) {
+            obj.material.emissive.set(0x333333);
+            setTimeout(() => { obj.material.emissive.set(0x000000); }, 500);
+        }
+    }
+}
+
+// ============================================================
+// 切换细胞类型
+// ============================================================
+function toggleCell() {
+    cellType = cellType === 'plant' ? 'animal' : 'plant';
+    const isPlant = cellType === 'plant';
+
+    document.getElementById('btn-toggle').textContent = isPlant ? '🔄 切换为动物细胞' : '🔄 切换为植物细胞';
+    document.getElementById('cell-title').textContent = isPlant ? '植物细胞' : '动物细胞';
+    document.getElementById('panel-sub').textContent = '点击细胞部件查看详情';
+    document.getElementById('info-text').className = 'info slide-up';
+    document.getElementById('info-text').innerHTML =
+        `已切换到 <b>${isPlant ? '植物' : '动物'}细胞</b><br><br>` +
+        `🖱️ 左键拖拽旋转 · 滚轮缩放<br>` +
+        `👆 点击部件查看详情`;
+
+    // 重新渲染
+    createCell();
+    updatePartList();
+    activePart = null;
+    hoveredPart = null;
+}
+
+// ============================================================
+// 重置视角
+// ============================================================
+function resetView() {
+    controls.radius = 7;
+    controls.theta  = 0;
+    controls.phi    = Math.PI / 2 - 0.25;
+    controls.target.set(0, 0, 0);
+    controls.autoRotate = true;
+}
+
+// ============================================================
+// 返回主页
+// ============================================================
+function goHome() {
+    window.location.href = 'index.html';
+}
+
+// ============================================================
+// 窗口大小改变
+// ============================================================
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// ============================================================
+// 渲染循环
+// ============================================================
+function animate() {
+    requestAnimationFrame(animate);
+
+    // 活跃部件轻微呼吸动画
+    if (activePart && !activePart.userData.isTransparent) {
+        const t = Date.now() * 0.002;
+        const s = 1 + Math.sin(t) * 0.04;
+        activePart.scale.setScalar(s);
+    }
+
+    controls.update();
+    renderer.render(scene, camera);
+}
+
+// ============================================================
+// 启动
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+    if (typeof THREE === 'undefined') {
+        document.getElementById('loading').innerHTML =
+            '<div style="color:#ef4444;font-size:1.3rem;text-align:center;">⚠️ Three.js 加载失败</div>' +
+            '<div style="color:#94a3b8;font-size:0.9rem;margin-top:14px;text-align:center;">请确保 three.min.js 与本文件在同一文件夹</div>';
+        return;
+    }
+    init();
+});
+</script>
+</body>
+</html>
