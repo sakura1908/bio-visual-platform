@@ -1,0 +1,1144 @@
+/* ===== 植物世界 ===== */
+.seed-diagram,
+.animal-interactive,
+.fish-interactive,
+.cell-display {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 20px;
+}
+
+/* 种子SVG */
+.seed-svg {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    display: block;
+}
+
+.seed-label {
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.seed-label:hover {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 种子萌发 */
+.seed-knowledge {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.germination-factors {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.factor-card {
+    background: var(--bg-hover);
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 100px;
+}
+
+.factor-icon { font-size: 2rem; }
+.factor-name { font-weight: bold; }
+
+.germination-note {
+    background: rgba(245, 158, 11, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    color: var(--accent-orange);
+    margin-top: 15px;
+}
+
+/* 植物分类对比 */
+.comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.comparison-card {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.comparison-card h3 {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.comparison-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.comparison-item {
+    background: var(--bg-hover);
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.comp-label {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 15px;
+    color: white;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.comparison-item p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.examples {
+    color: var(--accent-cyan);
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+/* 生命周期时间线 */
+.lifecycle-timeline {
+    position: relative;
+    padding: 40px 0;
+}
+
+.timeline-track {
+    position: absolute;
+    top: 50%;
+    left: 5%;
+    right: 5%;
+    height: 4px;
+    background: var(--accent-green);
+    border-radius: 2px;
+}
+
+.timeline-stages {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.timeline-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.timeline-item:hover { transform: scale(1.1); }
+
+.stage-icon {
+    font-size: 3rem;
+    background: var(--bg-dark);
+    padding: 15px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    border: 3px solid var(--accent-green);
+}
+
+.stage-name { font-weight: bold; text-align: center; }
+
+.lifecycle-detail {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+    margin-top: 30px;
+}
+
+.season-change {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+    margin-top: 20px;
+}
+
+.season-track {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.season {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.season.spring { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+.season.summer { background: rgba(245, 158, 11, 0.2); color: var(--accent-orange); }
+.season.autumn { background: rgba(234, 179, 8, 0.2); color: #eab308; }
+.season.winter { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+.arrow { color: var(--text-secondary); }
+
+/* 环境适应 */
+.adaptation-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.adaptation-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.adaptation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow);
+}
+
+.habitat-banner {
+    background: var(--accent-orange);
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.plant-visual {
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4rem;
+}
+
+.adaptation-card h3 { padding: 15px; text-align: center; }
+
+.adaptations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 15px 15px;
+}
+
+.adapt-tag {
+    background: var(--bg-hover);
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* ===== 动物王国 ===== */
+.insect-svg {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    display: block;
+}
+
+.insect-part {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.insect-part:hover { filter: brightness(1.3); }
+
+.insect-label { font-size: 12px; font-weight: bold; cursor: pointer; }
+
+.insect-knowledge {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.insect-intro { color: var(--text-secondary); margin: 15px 0; }
+
+.key-point, .confusion-box {
+    background: rgba(34, 197, 94, 0.15);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.key-icon { font-size: 1.2rem; }
+
+.confusion-box {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.examples-text { color: var(--text-secondary); margin-top: 15px; }
+
+/* 鱼类 */
+.fish-svg {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    display: block;
+}
+
+.fish-part {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.fish-part:hover { filter: brightness(1.3); }
+
+.fish-label { font-size: 12px; font-weight: bold; cursor: pointer; }
+
+.fish-features {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.feature-item {
+    background: var(--bg-hover);
+    padding: 12px 15px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.feature-item:hover { background: rgba(34, 197, 94, 0.2); }
+.feature-icon { font-size: 1.2rem; }
+
+.fish-survival {
+    background: var(--bg-hover);
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+/* 蚕的一生 */
+.silkworm-timeline {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.silk-stages {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.silk-stage {
+    background: var(--bg-hover);
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 120px;
+}
+
+.silk-stage:hover { background: var(--accent-green); transform: scale(1.05); }
+
+.silk-icon { font-size: 3rem; margin-bottom: 10px; }
+.silk-name { font-weight: bold; margin-bottom: 5px; }
+.silk-detail { font-size: 0.85rem; color: var(--text-secondary); }
+.silk-stage:hover .silk-detail { color: white; }
+.silk-arrow { font-size: 2rem; color: var(--accent-green); }
+
+.silkworm-explanation {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.metamorphosis-box {
+    background: rgba(139, 92, 246, 0.15);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.metamorphosis-box h3 { margin-bottom: 10px; }
+
+.silk-process {
+    background: var(--bg-hover);
+    padding: 20px;
+    border-radius: 12px;
+}
+
+/* 软体动物 */
+.mollusk-compare {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.mollusk-card {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mollusk-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow);
+}
+
+.mollusk-card svg { width: 150px; height: 100px; margin: 15px 0; }
+
+.mollusk-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.feat-tag {
+    background: var(--bg-hover);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.mollusk-detail {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+/* 生态系统 */
+.ecosystem-model {
+    position: relative;
+    height: 350px;
+    background: var(--bg-card);
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.eco-circle {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.eco-circle:hover { transform: scale(1.05); }
+
+.eco-knowledge {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.energy-flow {
+    background: var(--bg-hover);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.energy-flow h4 { margin-bottom: 10px; }
+
+/* ===== 人体奥秘 ===== */
+.senses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.sense-card {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.sense-card:hover {
+    transform: translateY(-5px);
+    border: 2px solid var(--accent-red);
+}
+
+.sense-icon { font-size: 3rem; margin-bottom: 10px; }
+.sense-card h4 { margin-bottom: 5px; }
+
+.sense-tag {
+    display: inline-block;
+    background: var(--accent-red);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+}
+
+.sense-desc { font-size: 0.9rem; color: var(--text-secondary); }
+
+.sense-detail {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+/* 运动系统 */
+.movement-model {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 16px;
+}
+
+.movement-parts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.movement-card {
+    background: var(--bg-hover);
+    padding: 25px;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.movement-card:hover { transform: scale(1.05); }
+.move-icon { font-size: 3rem; margin-bottom: 10px; }
+
+.movement-process {
+    background: var(--bg-dark);
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.process-flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: center;
+}
+
+.process-step {
+    background: var(--accent-red);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+/* 消化系统 */
+.digestive-journey {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 16px;
+}
+
+.digestive-path {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.digest-step {
+    background: var(--bg-hover);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 100px;
+}
+
+.digest-step:hover { background: var(--accent-orange); }
+
+.step-icon { font-size: 2rem; display: block; }
+.step-name { font-weight: bold; display: block; margin: 5px 0; }
+.step-func { font-size: 0.8rem; color: var(--text-secondary); }
+.digest-step:hover .step-func { color: white; }
+.digest-arrow { font-size: 1.5rem; color: var(--accent-orange); }
+
+.digest-key {
+    background: rgba(245, 158, 11, 0.2);
+    padding: 20px;
+    border-radius: 12px;
+}
+
+/* 呼吸系统 */
+.respiratory-model {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.respiratory-svg {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    display: block;
+}
+
+.resp-part { cursor: pointer; transition: all 0.3s; }
+.resp-part:hover { filter: brightness(1.3); }
+
+.resp-info {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.breath-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.breath-step {
+    background: var(--bg-hover);
+    padding: 15px;
+    border-radius: 12px;
+    border-left: 4px solid;
+}
+
+.breath-step.inhale { border-color: #3b82f6; }
+.breath-step.exhale { border-color: var(--accent-red); }
+.breath-step h4 { margin-bottom: 5px; }
+
+.resp-key {
+    background: rgba(59, 130, 246, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    color: #3b82f6;
+}
+
+/* 循环系统与神经系统 */
+.circulatory-model {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 16px;
+}
+
+.nervous-center {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.heart-model, .brain-model, .spinal-model, .nerves-model {
+    background: var(--bg-hover);
+    padding: 25px;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.heart-model:hover, .brain-model:hover,
+.spinal-model:hover, .nerves-model:hover { transform: scale(1.05); }
+
+.heart-icon, .brain-icon, .spinal-icon, .nerves-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.blood-vessels {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.vessel {
+    background: var(--bg-hover);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.vessel:hover { transform: scale(1.05); }
+.vessel-icon { font-size: 2rem; display: block; margin-bottom: 5px; }
+
+.circulation-cycles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.cycle-card {
+    background: var(--bg-hover);
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.cycle-result {
+    display: block;
+    margin-top: 10px;
+    color: var(--accent-green);
+}
+
+.nervous-model {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.process-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+/* ===== 细胞探秘 ===== */
+.cell-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.toggle-btn {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 12px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.toggle-btn.active {
+    background: var(--accent-green);
+    border-color: var(--accent-green);
+    color: white;
+}
+
+.cell-svg {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    display: block;
+}
+
+.cell-organelles {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.organelle-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.organelle-item {
+    background: var(--bg-hover);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+
+.organelle-item:hover {
+    border-color: var(--accent-purple);
+    transform: scale(1.05);
+}
+
+.org-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.org-name { font-weight: bold; font-size: 0.9rem; }
+.org-feature { font-size: 0.8rem; color: var(--text-secondary); }
+.plant-only { border-left: 3px solid var(--accent-green); }
+
+.animal-note {
+    background: rgba(239, 68, 68, 0.15);
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+    color: var(--accent-red);
+}
+
+/* 细胞对比 */
+.cell-comparison {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 16px;
+    margin-top: 30px;
+}
+
+.compare-table {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 20px 0;
+}
+
+.compare-header, .compare-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.compare-header { background: var(--bg-hover); font-weight: bold; }
+.compare-row { background: var(--bg-dark); }
+.compare-row:nth-child(even) { background: rgba(255,255,255,0.02); }
+
+.has { color: var(--accent-green); }
+.no { color: var(--accent-red); }
+
+.mistake-tip {
+    background: rgba(245, 158, 11, 0.15);
+    padding: 15px;
+    border-radius: 10px;
+    color: var(--accent-orange);
+}
+
+/* ===== 生命科学 ===== */
+.heredity-variation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.hv-card {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    flex: 1;
+    min-width: 200px;
+}
+
+.hv-card:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow);
+}
+
+.hv-icon { font-size: 4rem; margin-bottom: 15px; }
+.hv-vs { font-size: 3rem; color: var(--accent-purple); }
+
+.hv-example {
+    background: var(--bg-hover);
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+.hv-explanation {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.evolution-flow {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.evolution-flow span {
+    padding: 10px 20px;
+    background: var(--bg-hover);
+    border-radius: 20px;
+}
+
+.evolution-flow .result {
+    background: var(--accent-purple);
+    color: white;
+    font-weight: bold;
+}
+
+/* 化石 */
+.fossil-evidence {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.fossil-formation {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.formation-step {
+    background: var(--bg-hover);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.formation-step .step-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.step-arrow { font-size: 1.5rem; color: var(--accent-purple); }
+
+.evolution-patterns {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.pattern-arrows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.pattern-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.pattern-arrow {
+    background: var(--accent-purple);
+    padding: 8px 20px;
+    border-radius: 20px;
+}
+
+.natural-selection {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.selection-examples {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.selection-card {
+    background: var(--bg-hover);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.selection-card span { font-size: 2rem; }
+
+/* 生物多样性 */
+.bio-meanings {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.bio-meanings h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.bio-meanings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.bio-card {
+    background: var(--bg-hover);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.bio-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.bio-card h4 { margin-bottom: 5px; }
+.bio-card p { font-size: 0.85rem; color: var(--text-secondary); }
+
+.bio-value {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.value-list {
+    list-style: none;
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+}
+
+.value-list li {
+    background: var(--bg-hover);
+    padding: 12px 15px;
+    border-radius: 10px;
+}
+
+.bio-protection {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.protection-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.action-card {
+    background: var(--bg-hover);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.action-icon { font-size: 2rem; display: block; margin-bottom: 10px; }
+
+/* ===== 实验 ===== */
+.experiments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.experiment-card {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.experiment-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow);
+}
+
+.exp-icon { font-size: 3rem; margin-bottom: 15px; }
+.exp-difficulty { margin: 10px 0; color: var(--accent-orange); }
+
+.exp-btn {
+    background: linear-gradient(135deg, var(--accent-cyan), #0891b2);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.exp-btn:hover { transform: scale(1.05); }
+
+.lab-workspace {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 16px;
+    margin-top: 30px;
+}
+
+.back-btn {
+    background: var(--bg-hover);
+    border: none;
+    color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.back-btn:hover { background: var(--accent-green); }
+
+@media (max-width: 768px) {
+    .movement-parts { grid-template-columns: 1fr; }
+    .blood-vessels { grid-template-columns: 1fr; }
+    .circulation-cycles { grid-template-columns: 1fr; }
+    .nervous-center { grid-template-columns: 1fr; }
+    .digestive-path { flex-direction: column; }
+    .digest-arrow { transform: rotate(90deg); }
+}
