@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生物知识可视化平台 - 让科学更有趣</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/section.css">
+</head>
+<body>
+    <!-- 游戏状态栏 -->
+    <div class="game-bar" id="gameBar">
+        <div class="xp-bar">
+            <span class="level-icon" id="levelIcon">🌱</span>
+            <div class="xp-progress">
+                <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+            </div>
+            <span class="xp-text" id="xpText">0 XP</span>
+        </div>
+        <div class="badges-display">
+            <button class="badge-btn" onclick="toggleBadges()">🏅 <span id="badgeCount">0</span>/8</button>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="切换主题">🌙</button>
+        <button class="audio-toggle" onclick="toggleAudio()" id="audioBtn">🔊</button>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div class="search-overlay" id="searchOverlay" onclick="closeSearch()"></div>
+    <div class="search-container" id="searchContainer">
+        <div class="search-header">
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索知识点..." oninput="performSearch()" onkeydown="handleSearchKeydown(event)">
+            <button class="search-close" onclick="closeSearch()">✕</button>
+        </div>
+        <div class="search-results" id="searchResults">
+            <p class="search-hint">🔍 输入关键词搜索知识点</p>
+        </div>
+    </div>
+
+    <!-- 收藏面板 -->
+    <div class="favorites-panel" id="favoritesPanel">
+        <div class="favorites-header">
+            <h3>📌 我的收藏</h3>
+            <button class="fav-close" onclick="toggleFavorites()">✕</button>
+        </div>
+        <div class="favorites-list" id="favoritesList">
+            <p class="fav-empty">还没有收藏内容，快去学习吧！</p>
+        </div>
+    </div>
+
+    <!-- 笔记面板 -->
+    <div class="notes-panel" id="notesPanel">
+        <div class="notes-header">
+            <h3>📝 我的笔记</h3>
+            <div class="notes-actions">
+                <button class="notes-btn" onclick="exportNotes()">💾 导出</button>
+                <button class="fav-close" onclick="toggleNotes()">✕</button>
+            </div>
+        </div>
+        <textarea class="notes-input" id="notesInput" placeholder="在这里记录学习笔记..." oninput="saveNotes()"></textarea>
+        <div class="notes-tips">
+            <p>💡 提示：笔记会自动保存</p>
+        </div>
+    </div>
+
+    <!-- 徽章弹窗 -->
+    <div class="badges-modal" id="badgesModal">
+        <div class="badges-content">
+            <h2>🏅 我的徽章</h2>
+            <div class="badges-grid" id="badgesGrid"></div>
+            <button class="close-btn" onclick="toggleBadges()">关闭</button>
+        </div>
+    </div>
+
+    <!-- 徽章获得动画 -->
+    <div class="badge-earned" id="badgeEarned" style="display:none;">
+        <div class="badge-earned-content">
+            <div class="badge-icon" id="earnedIcon">🏆</div>
+            <div class="badge-name" id="earnedName">获得新徽章！</div>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="logo-icon">🧬</span>
+            <span class="logo-text">生物知识可视化平台</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#home" class="active" data-section="home">🏠 首页</a></li>
+            <li><a href="#plant" data-section="plant">🌱 植物</a></li>
+            <li><a href="#animal" data-section="animal">🐛 动物</a></li>
+            <li><a href="#human" data-section="human">🧍 人体</a></li>
+            <li><a href="#cell" data-section="cell">🔬 细胞</a></li>
+            <li><a href="#lifescience" data-section="lifescience">🌏 生命</a></li>
+            <li><a href="#experiment" data-section="experiment">🧪 实验</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button class="nav-action-btn" onclick="openSearch()" title="搜索">🔍</button>
+            <button class="nav-action-btn" onclick="toggleFavorites()" title="收藏">❤️</button>
+            <button class="nav-action-btn" onclick="toggleNotes()" title="笔记">📝</button>
+        </div>
+        <button class="mobile-toggle" onclick="toggleNav()">☰</button>
+    </nav>
+
+    <!-- ========== 首页 ========== -->
+    <section id="home" class="section active">
+        <div class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">探索<span class="highlight">生命</span>的奥秘</h1>
+                <p class="hero-subtitle">小学科学1-6年级生物知识全覆盖</p>
+                <p class="hero-desc">通过交互式可视化、游戏化学习，让抽象的生物知识变得生动有趣！</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="switchSection('plant')">🌱 开始探索</button>
+                    <button class="btn btn-secondary" onclick="switchSection('experiment')">🧪 做实验</button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="cell-animation">
+                    <div class="cell">
+                        <div class="nucleus"></div>
+                        <div class="organelle"></div>
+                        <div class="organelle"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 五大板块卡片 -->
+        <div class="section-cards">
+            <div class="section-card" onclick="switchSection('plant')" style="--card-color: #22c55e">
+                <div class="card-icon">🌱</div>
+                <h3>植物世界</h3>
+                <p>根茎叶花果，植物的奥秘全在这里</p>
+                <div class="card-tags"><span>开花植株</span><span>种子结构</span><span>生命周期</span></div>
+            </div>
+            <div class="section-card" onclick="switchSection('animal')" style="--card-color: #f59e0b">
+                <div class="card-icon">🐛</div>
+                <h3>动物王国</h3>
+                <p>昆虫鱼类蜗牛，探索动物的神奇</p>
+                <div class="card-tags"><span>昆虫结构</span><span>蚕的一生</span><span>生态系统</span></div>
+            </div>
+            <div class="section-card" onclick="switchSection('human')" style="--card-color: #ef4444">
+                <div class="card-icon">🧍</div>
+                <h3>人体奥秘</h3>
+                <p>五官感知、八大系统，认识你自己</p>
+                <div class="card-tags"><span>五脏六腑</span><span>感觉器官</span><span>运动系统</span></div>
+            </div>
+            <div class="section-card" onclick="switchSection('cell')" style="--card-color: #8b5cf6">
+                <div class="card-icon">🔬</div>
+                <h3>细胞探秘</h3>
+                <p>植物细胞vs动物细胞，一键切换对比</p>
+                <div class="card-tags"><span>细胞结构</span><span>双切换模型</span><span>对比学习</span></div>
+            </div>
+            <div class="section-card" onclick="switchSection('lifescience')" style="--card-color: #06b6d4">
+                <div class="card-icon">🌏</div>
+                <h3>生命科学</h3>
+                <p>遗传变异、进化化石，保护生物多样性</p>
+                <div class="card-tags"><span>遗传变异</span><span>生物进化</span><span>环境保护</span></div>
+            </div>
+        </div>
+
+        <!-- 学习统计 -->
+        <div class="learning-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="statKnowledge">0</div>
+                <div class="stat-label">已学习知识点</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statExperiments">0</div>
+                <div class="stat-label">完成实验数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statBadges">0</div>
+                <div class="stat-label">获得徽章</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statLevel">生物学徒</div>
+                <div class="stat-label">当前等级</div>
+            </div>
+        </div>
+
+        <!-- 学习进度 -->
+        <div class="learning-progress">
+            <h2>📊 我的学习进度</h2>
+            <div class="progress-grid">
+                <div class="progress-item" onclick="switchSection('plant')">
+                    <div class="progress-icon">🌱</div>
+                    <div class="progress-info">
+                        <span class="progress-name">植物世界</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressPlant" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text" id="progressPlantText">0%</span>
+                    </div>
+                </div>
+                <div class="progress-item" onclick="switchSection('animal')">
+                    <div class="progress-icon">🐛</div>
+                    <div class="progress-info">
+                        <span class="progress-name">动物王国</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressAnimal" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text" id="progressAnimalText">0%</span>
+                    </div>
+                </div>
+                <div class="progress-item" onclick="switchSection('human')">
+                    <div class="progress-icon">🧍</div>
+                    <div class="progress-info">
+                        <span class="progress-name">人体奥秘</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressHuman" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text" id="progressHumanText">0%</span>
+                    </div>
+                </div>
+                <div class="progress-item" onclick="switchSection('cell')">
+                    <div class="progress-icon">🔬</div>
+                    <div class="progress-info">
+                        <span class="progress-name">细胞探秘</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressCell" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text" id="progressCellText">0%</span>
+                    </div>
+                </div>
+                <div class="progress-item" onclick="switchSection('lifescience')">
+                    <div class="progress-icon">🌏</div>
+                    <div class="progress-info">
+                        <span class="progress-name">生命科学</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressLifescience" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text" id="progressLifescienceText">0%</span>
+                    </div>
+                </div>
+                <div class="progress-item" onclick="switchSection('experiment')">
+                    <div class="progress-icon">🧪</div>
+                    <div class="progress-info">
+                        <span class="progress-name">虚拟实验</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressExperiment" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text" id="progressExperimentText">0%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="overall-progress">
+                <div class="overall-info">
+                    <span class="overall-label">总学习进度</span>
+                    <span class="overall-percent" id="overallPercent">0%</span>
+                </div>
+                <div class="overall-bar">
+                    <div class="overall-fill" id="overallFill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== 植物世界 ========== -->
+    <section id="plant" class="section">
+        <div class="section-header">
+            <h2>🌱 植物世界</h2>
+            <p>探索植物的根茎叶花果，发现生命的奥秘</p>
+        </div>
+
+        <div class="sub-nav">
+            <button class="sub-nav-btn active" onclick="showPlantSection('whole-plant')">🌸 开花植株</button>
+            <button class="sub-nav-btn" onclick="showPlantSection('seed-structure')">🌰 种子结构</button>
+            <button class="sub-nav-btn" onclick="showPlantSection('plant-classification')">🔍 植物分类</button>
+            <button class="sub-nav-btn" onclick="showPlantSection('lifecycle')">🔄 生命周期</button>
+            <button class="sub-nav-btn" onclick="showPlantSection('environment-adaptation')">🏜️ 环境适应</button>
+        </div>
+
+        <!-- 开花植株 -->
+        <div id="plant-whole-plant" class="plant-content active">
+            <div class="plant-interactive">
+                <div class="plant-diagram">
+                    <svg viewBox="0 0 300 400" class="plant-svg" style="width:100%;max-width:280px;display:block;margin:0 auto;">
+                        <!-- 根 -->
+                        <line x1="150" y1="330" x2="100" y2="380" stroke="#a78bfa" stroke-width="4"/>
+                        <line x1="150" y1="330" x2="150" y2="390" stroke="#a78bfa" stroke-width="4"/>
+                        <line x1="150" y1="330" x2="200" y2="380" stroke="#a78bfa" stroke-width="4"/>
+                        <text x="85" y="398" fill="#a78bfa" font-size="13" font-weight="bold">根</text>
+                        <!-- 茎 -->
+                        <rect x="142" y="200" width="16" height="130" rx="8" fill="#86efac"/>
+                        <text x="168" y="270" fill="#86efac" font-size="13" font-weight="bold">茎</text>
+                        <!-- 叶片 -->
+                        <ellipse cx="100" cy="230" rx="45" ry="22" fill="#4ade80" transform="rotate(-30,100,230)"/>
+                        <ellipse cx="200" cy="210" rx="45" ry="22" fill="#4ade80" transform="rotate(30,200,210)"/>
+                        <text x="48" y="218" fill="#4ade80" font-size="13" font-weight="bold">叶</text>
+                        <!-- 花 -->
+                        <circle cx="150" cy="120" r="35" fill="#fbbf24" opacity="0.3"/>
+                        <circle cx="150" cy="100" r="18" fill="#f472b6"/>
+                        <circle cx="120" cy="125" r="18" fill="#f472b6"/>
+                        <circle cx="180" cy="125" r="18" fill="#f472b6"/>
+                        <circle cx="150" cy="148" r="18" fill="#f472b6"/>
+                        <circle cx="150" cy="120" r="15" fill="#fbbf24"/>
+                        <text x="190" y="100" fill="#f472b6" font-size="13" font-weight="bold">花</text>
+                        <!-- 果实 -->
+                        <ellipse cx="95" cy="175" rx="18" ry="22" fill="#f87171"/>
+                        <text x="60" y="175" fill="#f87171" font-size="13" font-weight="bold">果实</text>
+                        <!-- 地面线 -->
+                        <line x1="30" y1="335" x2="270" y2="335" stroke="#6b7280" stroke-width="2" stroke-dasharray="6,4"/>
+                    </svg>
+
+                    <!-- 可点击热点 -->
+                    <div class="plant-hotspots" style="position:relative;margin-top:-20px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
+                        <button class="plant-part" data-part="root" onclick="showPlantPart('root')" style="background:#7c3aed20;border:2px solid #a78bfa;color:#a78bfa;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:0.9rem;">🌿 根</button>
+                        <button class="plant-part" data-part="stem" onclick="showPlantPart('stem')" style="background:#16a34a20;border:2px solid #86efac;color:#86efac;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:0.9rem;">🎋 茎</button>
+                        <button class="plant-part" data-part="leaf" onclick="showPlantPart('leaf')" style="background:#15803d20;border:2px solid #4ade80;color:#4ade80;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:0.9rem;">🍃 叶</button>
+                        <button class="plant-part" data-part="flower" onclick="showPlantPart('flower')" style="background:#be185d20;border:2px solid #f472b6;color:#f472b6;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:0.9rem;">🌺 花</button>
+                        <button class="plant-part" data-part="fruit" onclick="showPlantPart('fruit')" style="background:#b91c1c20;border:2px solid #f87171;color:#f87171;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:0.9rem;">🍎 果实&种子</button>
+                    </div>
+                </div>
+
+                <div class="plant-info">
+                    <div class="plant-detail-card" id="plantDetail" style="background:var(--bg-card);border-radius:16px;padding:25px;min-height:200px;">
+                        <div id="plantPartIcon" style="font-size:3rem;margin-bottom:10px;">🌱</div>
+                        <div id="plantPartName" style="font-size:1.4rem;font-weight:bold;margin-bottom:15px;color:var(--accent-green);">点击左侧植物部位</div>
+                        <div id="plantPartFacts" style="color:var(--text-secondary);">
+                            <p>👆 点击植物的各个部位，了解它们的功能和特点</p>
+                        </div>
+                        <div id="plantGradeTags" style="display:none;margin-top:15px;display:flex;gap:8px;flex-wrap:wrap;">
+                        </div>
+                        <div style="margin-top:15px;display:flex;gap:10px;">
+                            <button id="plantSpeakBtn" onclick="speakPlantFacts()" style="display:none;background:var(--accent-cyan);color:white;border:none;padding:8px 18px;border-radius:20px;cursor:pointer;">🔊 朗读</button>
+                            <button onclick="toggleFavorite('plant')" id="plantFavBtn" style="background:var(--bg-hover);color:var(--text-secondary);border:none;padding:8px 18px;border-radius:20px;cursor:pointer;">♡</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 种子结构 -->
+        <div id="plant-seed-structure" class="plant-content">
+            <div class="seed-knowledge">
+                <h3 style="margin-bottom:20px;font-size:1.3rem;">🌰 种子结构剖面</h3>
+                <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+                    <svg viewBox="0 0 260 280" style="width:220px;flex-shrink:0;">
+                        <!-- 种皮 -->
+                        <ellipse cx="130" cy="140" rx="110" ry="130" fill="#92400e" opacity="0.3" stroke="#92400e" stroke-width="3"/>
+                        <!-- 子叶 -->
+                        <ellipse cx="100" cy="150" rx="65" ry="100" fill="#86efac" opacity="0.7"/>
+                        <ellipse cx="160" cy="150" rx="65" ry="100" fill="#86efac" opacity="0.5"/>
+                        <!-- 胚芽 -->
+                        <ellipse cx="130" cy="75" rx="18" ry="25" fill="#4ade80"/>
+                        <text x="118" y="79" fill="white" font-size="11" font-weight="bold">胚芽</text>
+                        <!-- 胚根 -->
+                        <ellipse cx="130" cy="220" rx="15" ry="22" fill="#f97316"/>
+                        <text x="118" y="225" fill="white" font-size="11" font-weight="bold">胚根</text>
+                        <!-- 标注 -->
+                        <text x="10" y="50" fill="#92400e" font-size="13" font-weight="bold" onclick="showSeedPart('seed-coat')" style="cursor:pointer;">🟤 种皮</text>
+                        <text x="155" y="160" fill="#22c55e" font-size="13" font-weight="bold" onclick="showSeedPart('cotyledon')" style="cursor:pointer;">🥜 子叶</text>
+                    </svg>
+                    <div style="flex:1;min-width:200px;">
+                        <div id="seedPartFacts" style="background:var(--bg-card);padding:20px;border-radius:12px;color:var(--text-secondary);">
+                            <p>👆 点击下方标签，了解种子各部分功能</p>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:15px;">
+                            <button onclick="showSeedPart('seed-coat')" style="background:var(--bg-card);border:2px solid #92400e;color:#b45309;padding:8px 15px;border-radius:20px;cursor:pointer;">🟤 种皮</button>
+                            <button onclick="showSeedPart('cotyledon')" style="background:var(--bg-card);border:2px solid #22c55e;color:#22c55e;padding:8px 15px;border-radius:20px;cursor:pointer;">🥜 子叶</button>
+                            <button onclick="showSeedPart('plumule')" style="background:var(--bg-card);border:2px solid #4ade80;color:#4ade80;padding:8px 15px;border-radius:20px;cursor:pointer;">🌱 胚芽</button>
+                            <button onclick="showSeedPart('radicle')" style="background:var(--bg-card);border:2px solid #f97316;color:#f97316;padding:8px 15px;border-radius:20px;cursor:pointer;">📍 胚根</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="germination-factors" style="margin-top:25px;">
+                    <h4 style="width:100%;margin-bottom:10px;">🌿 种子萌发三要素</h4>
+                    <div class="factor-card">
+                        <div class="factor-icon">🌡️</div>
+                        <div class="factor-name">适宜温度</div>
+                    </div>
+                    <div class="factor-card">
+                        <div class="factor-icon">💧</div>
+                        <div class="factor-name">适量水分</div>
+                    </div>
+                    <div class="factor-card">
+                        <div class="factor-icon">💨</div>
+                        <div class="factor-name">充足空气</div>
+                    </div>
+                </div>
+                <div class="germination-note">
+                    ⚠️ 【注意】发芽阶段不需要阳光！长出叶片后才需要光合作用
+                </div>
+            </div>
+        </div>
+
+        <!-- 植物分类 -->
+        <div id="plant-plant-classification" class="plant-content">
+            <h3 style="margin-bottom:20px;">🔍 植物分类对比</h3>
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h3>直根 vs 须根</h3>
+                    <div class="comparison-items">
+                        <div class="comparison-item" style="background:var(--bg-hover);padding:15px;border-radius:12px;">
+                            <strong style="color:var(--accent-green);">直根</strong>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:5px;">一根粗壮主根，侧根细小<br>例：凤仙花、桃树、萝卜</p>
+                        </div>
+                        <div class="comparison-item" style="background:var(--bg-hover);padding:15px;border-radius:12px;">
+                            <strong style="color:var(--accent-orange);">须根</strong>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:5px;">无粗主根，大量细根丛生<br>例：水稻、小麦、葱</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="comparison-card">
+                    <h3>木本 vs 草本</h3>
+                    <div class="comparison-items">
+                        <div class="comparison-item" style="background:var(--bg-hover);padding:15px;border-radius:12px;">
+                            <strong style="color:var(--accent-green);">木本植物</strong>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:5px;">茎坚硬木质化，多年生<br>例：樟树、梧桐、杨树</p>
+                        </div>
+                        <div class="comparison-item" style="background:var(--bg-hover);padding:15px;border-radius:12px;">
+                            <strong style="color:var(--accent-cyan);">草本植物</strong>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:5px;">茎柔软无木质，生命周期短<br>例：狗尾草、三叶草、水稻</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="comparison-card">
+                    <h3>开花 vs 不开花</h3>
+                    <div class="comparison-items">
+                        <div class="comparison-item" style="background:var(--bg-hover);padding:15px;border-radius:12px;">
+                            <strong style="color:var(--accent-pink);">开花植物</strong>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:5px;">依靠种子繁殖<br>例：桃树、向日葵、水稻</p>
+                        </div>
+                        <div class="comparison-item" style="background:var(--bg-hover);padding:15px;border-radius:12px;">
+                            <strong style="color:var(--accent-purple);">不开花植物</strong>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:5px;">无花无种子，依靠孢子繁殖<br>例：苔藓、蕨类、藻类</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 生命周期 -->
+        <div id="plant-lifecycle" class="plant-content">
+            <h3 style="margin-bottom:20px;">🔄 植物生命周期</h3>
+            <div class="lifecycle-timeline" style="display:flex;gap:15px;flex-wrap:wrap;justify-content:center;">
+                <div class="timeline-item" onclick="showLifecycleStage(0)" style="background:var(--bg-card);padding:20px;border-radius:16px;text-align:center;cursor:pointer;min-width:120px;flex:1;transition:all 0.3s;">
+                    <div class="stage-icon" style="font-size:2.5rem;margin-bottom:8px;">🌱</div>
+                    <div style="font-weight:bold;">播种</div>
+                </div>
+                <div style="display:flex;align-items:center;color:var(--text-secondary);font-size:1.5rem;">→</div>
+                <div class="timeline-item" onclick="showLifecycleStage(1)" style="background:var(--bg-card);padding:20px;border-radius:16px;text-align:center;cursor:pointer;min-width:120px;flex:1;transition:all 0.3s;">
+                    <div class="stage-icon" style="font-size:2.5rem;margin-bottom:8px;">🌿</div>
+                    <div style="font-weight:bold;">发芽</div>
+                </div>
+                <div style="display:flex;align-items:center;color:var(--text-secondary);font-size:1.5rem;">→</div>
+                <div class="timeline-item" onclick="showLifecycleStage(2)" style="background:var(--bg-card);padding:20px;border-radius:16px;text-align:center;cursor:pointer;min-width:120px;flex:1;transition:all 0.3s;">
+                    <div class="stage-icon" style="font-size:2.5rem;margin-bottom:8px;">🌲</div>
+                    <div style="font-weight:bold;">长高长叶</div>
+                </div>
+                <div style="display:flex;align-items:center;color:var(--text-secondary);font-size:1.5rem;">→</div>
+                <div class="timeline-item" onclick="showLifecycleStage(3)" style="background:var(--bg-card);padding:20px;border-radius:16px;text-align:center;cursor:pointer;min-width:120px;flex:1;transition:all 0.3s;">
+                    <div class="stage-icon" style="font-size:2.5rem;margin-bottom:8px;">🌸</div>
+                    <div style="font-weight:bold;">开花</div>
+                </div>
+                <div style="display:flex;align-items:center;color:var(--text-secondary);font-size:1.5rem;">→</div>
+                <div class="timeline-item" onclick="showLifecycleStage(4)" style="background:var(--bg-card);padding:20px;border-radius:16px;text-align:center;cursor:pointer;min-width:120px;flex:1;transition:all 0.3s;">
+                    <div class="stage-icon" style="font-size:2.5rem;margin-bottom:8px;">🍎</div>
+                    <div style="font-weight:bold;">结果</div>
+                </div>
+            </div>
+            <div id="lifecycleInfo" style="background:var(--bg-card);padding:20px;border-radius:16px;margin-top:20px;">
+                <div id="lifecycleTitle" style="font-size:1.2rem;font-weight:bold;margin-bottom:8px;">👆 点击上方阶段了解详情</div>
+                <div id="lifecycleDesc" style="color:var(--text-secondary);">植物的生命周期是一个神奇的过程，从一粒小种子到开花结果！</div>
+            </div>
+        </div>
+
+        <!-- 环境适应 -->
+        <div id="plant-environment-adaptation" class="plant-content">
+            <h3 style="margin-bottom:20px;">🏜️ 植物环境适应</h3>
+            <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                <div onclick="showAdaptation('仙人掌')" style="background:var(--bg-card);padding:20px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;" class="adaptation-card">
+                    <div style="font-size:3rem;">🌵</div>
+                    <div style="font-weight:bold;margin-top:8px;">仙人掌</div>
+                    <div style="color:var(--accent-orange);font-size:0.85rem;">沙漠环境</div>
+                </div>
+                <div onclick="showAdaptation('浮萍')" style="background:var(--bg-card);padding:20px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;" class="adaptation-card">
+                    <div style="font-size:3rem;">🌿</div>
+                    <div style="font-weight:bold;margin-top:8px;">浮萍</div>
+                    <div style="color:var(--accent-cyan);font-size:0.85rem;">浅水环境</div>
+                </div>
+                <div onclick="showAdaptation('松树')" style="background:var(--bg-card);padding:20px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;" class="adaptation-card">
+                    <div style="font-size:3rem;">🌲</div>
+                    <div style="font-weight:bold;margin-top:8px;">松树</div>
+                    <div style="color:var(--accent-green);font-size:0.85rem;">寒冷山地</div>
+                </div>
+            </div>
+            <div id="adaptationInfo" style="background:var(--bg-card);padding:20px;border-radius:16px;margin-top:20px;color:var(--text-secondary);">
+                <p>👆 点击上方植物，了解它们如何适应环境</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== 动物王国 ========== -->
+    <section id="animal" class="section">
+        <div class="section-header">
+            <h2>🐛 动物王国</h2>
+            <p>探索动物世界的神奇与多样</p>
+        </div>
+
+        <div class="sub-nav">
+            <button class="sub-nav-btn active" onclick="showAnimalSection('insect')">🦋 昆虫结构</button>
+            <button class="sub-nav-btn" onclick="showAnimalSection('fish')">🐟 鱼类</button>
+            <button class="sub-nav-btn" onclick="showAnimalSection('silkworm')">🐛 蚕的一生</button>
+            <button class="sub-nav-btn" onclick="showAnimalSection('mollusk')">🐌 蜗牛蚯蚓</button>
+            <button class="sub-nav-btn" onclick="showAnimalSection('ecosystem')">🌍 生态系统</button>
+        </div>
+
+        <!-- 昆虫结构 -->
+        <div id="animal-insect" class="animal-content active">
+            <div class="animal-interactive">
+                <div style="text-align:center;padding:20px;">
+                    <svg viewBox="0 0 300 300" style="width:260px;display:inline-block;">
+                        <!-- 头部 -->
+                        <circle cx="150" cy="55" r="38" fill="#fbbf24" opacity="0.85" onclick="showInsectPart('head')" style="cursor:pointer;"/>
+                        <text x="136" y="60" fill="#78350f" font-size="14" font-weight="bold">头部</text>
+                        <!-- 触角 -->
+                        <line x1="128" y1="25" x2="90" y2="5" stroke="#f59e0b" stroke-width="3"/>
+                        <circle cx="88" cy="3" r="5" fill="#f59e0b"/>
+                        <line x1="172" y1="25" x2="210" y2="5" stroke="#f59e0b" stroke-width="3"/>
+                        <circle cx="212" cy="3" r="5" fill="#f59e0b"/>
+                        <text x="56" y="18" fill="#f59e0b" font-size="11" onclick="showInsectPart('antenna')" style="cursor:pointer;">触角</text>
+                        <!-- 胸部 -->
+                        <ellipse cx="150" cy="140" rx="45" ry="38" fill="#34d399" opacity="0.85" onclick="showInsectPart('thorax')" style="cursor:pointer;"/>
+                        <text x="132" y="145" fill="#065f46" font-size="14" font-weight="bold">胸部</text>
+                        <!-- 翅膀 -->
+                        <ellipse cx="90" cy="130" rx="35" ry="20" fill="#a7f3d0" opacity="0.7" transform="rotate(-30,90,130)"/>
+                        <ellipse cx="210" cy="130" rx="35" ry="20" fill="#a7f3d0" opacity="0.7" transform="rotate(30,210,130)"/>
+                        <!-- 六足 (胸部) -->
+                        <line x1="115" y1="140" x2="70" y2="165" stroke="#22c55e" stroke-width="3"/>
+                        <line x1="105" y1="150" x2="60" y2="180" stroke="#22c55e" stroke-width="3"/>
+                        <line x1="115" y1="160" x2="70" y2="195" stroke="#22c55e" stroke-width="3"/>
+                        <line x1="185" y1="140" x2="230" y2="165" stroke="#22c55e" stroke-width="3"/>
+                        <line x1="195" y1="150" x2="240" y2="180" stroke="#22c55e" stroke-width="3"/>
+                        <line x1="185" y1="160" x2="230" y2="195" stroke="#22c55e" stroke-width="3"/>
+                        <text x="30" y="183" fill="#22c55e" font-size="11" onclick="showInsectPart('legs')" style="cursor:pointer;">六足</text>
+                        <!-- 腹部 -->
+                        <ellipse cx="150" cy="230" rx="38" ry="55" fill="#f472b6" opacity="0.85" onclick="showInsectPart('abdomen')" style="cursor:pointer;"/>
+                        <text x="132" y="235" fill="#831843" font-size="14" font-weight="bold">腹部</text>
+                    </svg>
+                </div>
+            </div>
+            <div id="insectKnowledge" style="background:var(--bg-card);padding:20px;border-radius:16px;margin-top:15px;min-height:100px;">
+                <p style="color:var(--text-secondary);">👆 点击昆虫各部位了解结构特征</p>
+            </div>
+            <div style="background:rgba(34,197,94,0.1);border:1px solid #22c55e;padding:15px;border-radius:12px;margin-top:15px;">
+                <strong style="color:var(--accent-green);">🔑 关键判断：</strong>
+                <span style="color:var(--text-secondary);">同时满足「三段身体（头、胸、腹）+ 六条腿」才是昆虫！</span>
+            </div>
+            <div style="background:rgba(239,68,68,0.1);border:1px solid #ef4444;padding:15px;border-radius:12px;margin-top:10px;">
+                <strong style="color:var(--accent-red);">⚠️ 易错：</strong>
+                <span style="color:var(--text-secondary);">蜘蛛有8条腿（不是昆虫）；蜗牛、蚯蚓身体不分三段（不是昆虫）</span>
+            </div>
+        </div>
+
+        <!-- 鱼类 -->
+        <div id="animal-fish" class="animal-content">
+            <div class="fish-interactive" style="text-align:center;">
+                <svg viewBox="0 0 400 200" style="width:100%;max-width:380px;display:inline-block;">
+                    <!-- 鱼体 -->
+                    <ellipse cx="180" cy="100" rx="120" ry="55" fill="#60a5fa" opacity="0.8"/>
+                    <!-- 鱼尾 -->
+                    <polygon points="320,100 360,65 360,135" fill="#3b82f6"/>
+                    <!-- 鱼头 -->
+                    <ellipse cx="75" cy="100" rx="50" ry="44" fill="#93c5fd"/>
+                    <!-- 眼睛 -->
+                    <circle cx="65" cy="88" r="12" fill="white"/>
+                    <circle cx="67" cy="88" r="6" fill="#1e3a5f"/>
+                    <!-- 嘴 -->
+                    <path d="M30,100 Q25,108 30,115" stroke="#1e40af" stroke-width="2.5" fill="none"/>
+                    <!-- 鳃 -->
+                    <line x1="108" y1="68" x2="108" y2="132" stroke="#1d4ed8" stroke-width="3" onclick="showFishPart('gill')" style="cursor:pointer;"/>
+                    <text x="112" y="95" fill="#93c5fd" font-size="13" font-weight="bold" onclick="showFishPart('gill')" style="cursor:pointer;">鳃</text>
+                    <!-- 背鳍 -->
+                    <polygon points="150,45 170,100 200,100 220,45" fill="#2563eb" opacity="0.7" onclick="showFishPart('fin')" style="cursor:pointer;"/>
+                    <text x="175" y="40" fill="#60a5fa" font-size="12" onclick="showFishPart('fin')" style="cursor:pointer;">背鳍</text>
+                    <!-- 鳞片 -->
+                    <text x="155" y="110" fill="#bfdbfe" font-size="11" onclick="showFishPart('scale')" style="cursor:pointer;">～鳞片～</text>
+                </svg>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:15px;">
+                <button onclick="showFishPart('gill')" style="background:var(--bg-card);border:2px solid #60a5fa;color:#60a5fa;padding:8px 18px;border-radius:20px;cursor:pointer;">💨 鳃</button>
+                <button onclick="showFishPart('fin')" style="background:var(--bg-card);border:2px solid #2563eb;color:#60a5fa;padding:8px 18px;border-radius:20px;cursor:pointer;">🔱 鱼鳍</button>
+                <button onclick="showFishPart('scale')" style="background:var(--bg-card);border:2px solid #93c5fd;color:#93c5fd;padding:8px 18px;border-radius:20px;cursor:pointer;">🐟 鳞片</button>
+            </div>
+            <div id="fishKnowledge" style="background:var(--bg-card);padding:20px;border-radius:16px;margin-top:15px;min-height:80px;color:var(--text-secondary);">
+                <p>👆 点击鱼的部位或按钮了解鱼的特征</p>
+            </div>
+            <div style="background:rgba(96,165,250,0.1);border:1px solid #60a5fa;padding:15px;border-radius:12px;margin-top:10px;">
+                <strong style="color:#60a5fa;">🐟 鱼类特征：</strong>
+                <span style="color:var(--text-secondary);">终生水中生活 · 鳃呼吸 · 鱼鳍游动 · 鳞片保护 · 流线型身体</span>
+            </div>
+        </div>
+
+        <!-- 蚕的一生 -->
+        <div id="animal-silkworm" class="animal-content">
+            <h3 style="margin-bottom:20px;">🐛 蚕的一生（完全变态发育）</h3>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center;">
+                <div class="silk-stage" onclick="showSilkStage(0)" style="background:var(--bg-card);padding:20px;border-radius:16px;text-align:center;cursor:pointer;flex:1;min-width:120px;transition:all 0.3s;">
+                    <div style="font-size:3rem;">🥚</div>
+                    <div style="font-weight:bold;margin-top:8px;">卵</div>
+                </div>
+                <div style="color:var(--text-secondary);font-size:2rem;">→</div>
+                <div class="silk-stage" onclick="showSilkStage(1)" style="background:var(--bg-card);padding:20px;border-radius:16px;text-align:center;cursor:pointer;flex:1;min-width:120px;transition:all 0.3s;">
+                    <div style="font-size:3rem;">🐛</div>
+                    <div style="font-weight:bold;margin-top:8px;">幼虫（蚕）</div>
+                </div>
+                <div style="color:var(--text-secondary);font-size:2rem;">→</div>
+                <div class="silk-stage" onclick="showSilkStage(2)" style="background:var(--bg-card);padding:20px;border-radius:16px;text-align:center;cursor:pointer;flex:1;min-width:120px;transition:all 0.3s;">
+                    <div style="font-size:3rem;">🫧</div>
+                    <div style="font-weight:bold;margin-top:8px;">蛹（茧内）</div>
+                </div>
+                <div style="color:var(--text-secondary);font-size:2rem;">→</div>
+                <div class="silk-stage" onclick="showSilkStage(3)" style="background:var(--bg-card);padding:20px;border-radius:16px;text-align:center;cursor:pointer;flex:1;min-width:120px;transition:all 0.3s;">
+                    <div style="font-size:3rem;">🦋</div>
+                    <div style="font-weight:bold;margin-top:8px;">成虫（蚕蛾）</div>
+                </div>
+            </div>
+            <div id="silkStageInfo" style="background:var(--bg-card);padding:20px;border-radius:16px;margin-top:15px;">
+                <div id="silkStageTitle" style="font-size:1.2rem;font-weight:bold;margin-bottom:8px;">👆 点击各阶段了解详情</div>
+                <div id="silkStageDetail" style="color:var(--text-secondary);">蚕是完全变态发育，经历卵、幼虫、蛹、成虫四个阶段，形态各不相同</div>
+            </div>
+            <div style="background:rgba(139,92,246,0.1);border:1px solid #8b5cf6;padding:15px;border-radius:12px;margin-top:10px;">
+                <strong style="color:var(--accent-purple);">💡 完全变态发育：</strong>
+                <span style="color:var(--text-secondary);">卵 → 幼虫 → 蛹 → 成虫，四阶段形态完全不同。成虫不进食，只完成交配产卵</span>
+            </div>
+        </div>
+
+        <!-- 蜗牛蚯蚓 -->
+        <div id="animal-mollusk" class="animal-content">
+            <h3 style="margin-bottom:20px;">🐌 蜗牛与🪱蚯蚓</h3>
+            <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                <div class="mollusk-card" onclick="showMollusk('snail')" style="background:var(--bg-card);padding:25px;border-radius:16px;cursor:pointer;flex:1;min-width:200px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:4rem;">🐌</div>
+                    <h3 style="margin-top:10px;">蜗牛</h3>
+                    <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:8px;">软体动物 · 螺旋贝壳 · 腹足爬行</p>
+                </div>
+                <div class="mollusk-card" onclick="showMollusk('earthworm')" style="background:var(--bg-card);padding:25px;border-radius:16px;cursor:pointer;flex:1;min-width:200px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:4rem;">🪱</div>
+                    <h3 style="margin-top:10px;">蚯蚓</h3>
+                    <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:8px;">环节动物 · 体节组成 · 体表呼吸</p>
+                </div>
+            </div>
+            <div id="molluskDetail" style="background:var(--bg-card);padding:20px;border-radius:16px;margin-top:15px;min-height:100px;color:var(--text-secondary);">
+                <p>👆 点击上方卡片了解详细特征</p>
+            </div>
+            <div style="background:rgba(239,68,68,0.1);border:1px solid #ef4444;padding:15px;border-radius:12px;margin-top:10px;">
+                <strong style="color:var(--accent-red);">⚠️ 注意：</strong>
+                <span style="color:var(--text-secondary);">蜗牛和蚯蚓都不是昆虫！它们身体不分头胸腹，无六条腿</span>
+            </div>
+        </div>
+
+        <!-- 生态系统 -->
+        <div id="animal-ecosystem" class="animal-content">
+            <h3 style="margin-bottom:20px;">🌍 生态系统与食物链</h3>
+            <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                <div onclick="showEcoRole('生产者')" style="background:rgba(34,197,94,0.15);border:2px solid #22c55e;padding:25px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;" class="eco-circle">
+                    <div style="font-size:3rem;">🌿</div>
+                    <h3 style="color:var(--accent-green);margin-top:8px;">生产者</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">绿色植物</p>
+                </div>
+                <div onclick="showEcoRole('消费者')" style="background:rgba(245,158,11,0.15);border:2px solid #f59e0b;padding:25px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;" class="eco-circle">
+                    <div style="font-size:3rem;">🦔</div>
+                    <h3 style="color:var(--accent-orange);margin-top:8px;">消费者</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">所有动物</p>
+                </div>
+                <div onclick="showEcoRole('分解者')" style="background:rgba(139,92,246,0.15);border:2px solid #8b5cf6;padding:25px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;" class="eco-circle">
+                    <div style="font-size:3rem;">🦠</div>
+                    <h3 style="color:var(--accent-purple);margin-top:8px;">分解者</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">细菌、真菌</p>
+                </div>
+            </div>
+            <div id="ecoKnowledge" style="background:var(--bg-card);padding:20px;border-radius:16px;margin-top:15px;min-height:80px;color:var(--text-secondary);">
+                <p>👆 点击了解生产者、消费者和分解者的作用</p>
+            </div>
+            <div style="background:var(--bg-card);padding:20px;border-radius:16px;margin-top:15px;">
+                <h4 style="margin-bottom:12px;">🍃 食物链示例：</h4>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:1.1rem;">
+                    <span style="background:rgba(34,197,94,0.2);padding:8px 15px;border-radius:20px;">🌿 草</span>
+                    <span style="color:var(--text-secondary);">→</span>
+                    <span style="background:rgba(245,158,11,0.2);padding:8px 15px;border-radius:20px;">🐰 兔子</span>
+                    <span style="color:var(--text-secondary);">→</span>
+                    <span style="background:rgba(239,68,68,0.2);padding:8px 15px;border-radius:20px;">🦊 狐狸</span>
+                    <span style="color:var(--text-secondary);">→</span>
+                    <span style="background:rgba(139,92,246,0.2);padding:8px 15px;border-radius:20px;">🦠 分解者</span>
+                </div>
+                <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:10px;">能量流动：太阳 → 植物 → 动物 → 分解者 → 土壤养分 → 植物</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== 人体奥秘 ========== -->
+    <section id="human" class="section">
+        <div class="section-header">
+            <h2>🧍 人体奥秘</h2>
+            <p>了解我们自己的身体 — 五官感知、运动与系统</p>
+        </div>
+
+        <div class="sub-nav">
+            <button class="sub-nav-btn active" onclick="showHumanSection('five-senses')">👀 五官感知</button>
+            <button class="sub-nav-btn" onclick="showHumanSection('movement')">🏃 运动系统</button>
+            <button class="sub-nav-btn" onclick="showHumanSection('digestive')">🍽️ 消化系统</button>
+            <button class="sub-nav-btn" onclick="showHumanSection('respiratory')">🫁 呼吸系统</button>
+            <button class="sub-nav-btn" onclick="showHumanSection('circulatory')">❤️ 循环系统</button>
+            <button class="sub-nav-btn" onclick="showHumanSection('nervous')">🧠 神经系统</button>
+        </div>
+
+        <!-- 五官感知 -->
+        <div id="human-five-senses" class="human-content active">
+            <h3 style="margin-bottom:20px;">👀 五官感知世界</h3>
+            <div style="display:flex;gap:15px;flex-wrap:wrap;">
+                <div class="sense-card" onclick="showSense('眼睛')" style="background:var(--bg-card);padding:20px;border-radius:16px;cursor:pointer;flex:1;min-width:120px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">👁️</div>
+                    <div style="font-weight:bold;margin-top:8px;">眼睛</div>
+                    <div style="color:var(--accent-cyan);font-size:0.85rem;">视觉</div>
+                </div>
+                <div class="sense-card" onclick="showSense('耳朵')" style="background:var(--bg-card);padding:20px;border-radius:16px;cursor:pointer;flex:1;min-width:120px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">👂</div>
+                    <div style="font-weight:bold;margin-top:8px;">耳朵</div>
+                    <div style="color:var(--accent-cyan);font-size:0.85rem;">听觉</div>
+                </div>
+                <div class="sense-card" onclick="showSense('鼻子')" style="background:var(--bg-card);padding:20px;border-radius:16px;cursor:pointer;flex:1;min-width:120px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">👃</div>
+                    <div style="font-weight:bold;margin-top:8px;">鼻子</div>
+                    <div style="color:var(--accent-cyan);font-size:0.85rem;">嗅觉</div>
+                </div>
+                <div class="sense-card" onclick="showSense('舌头')" style="background:var(--bg-card);padding:20px;border-radius:16px;cursor:pointer;flex:1;min-width:120px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">👅</div>
+                    <div style="font-weight:bold;margin-top:8px;">舌头</div>
+                    <div style="color:var(--accent-cyan);font-size:0.85rem;">味觉</div>
+                </div>
+                <div class="sense-card" onclick="showSense('皮肤')" style="background:var(--bg-card);padding:20px;border-radius:16px;cursor:pointer;flex:1;min-width:120px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">✋</div>
+                    <div style="font-weight:bold;margin-top:8px;">皮肤</div>
+                    <div style="color:var(--accent-cyan);font-size:0.85rem;">触觉</div>
+                </div>
+            </div>
+            <div id="senseDetail" style="background:var(--bg-card);padding:20px;border-radius:16px;margin-top:15px;min-height:100px;color:var(--text-secondary);">
+                <p>👆 点击上方感觉器官了解详情</p>
+            </div>
+        </div>
+
+        <!-- 运动系统 -->
+        <div id="human-movement" class="human-content">
+            <h3 style="margin-bottom:20px;">🏃 运动系统</h3>
+            <div style="display:flex;gap:15px;flex-wrap:wrap;">
+                <div class="movement-card" onclick="showMovementPart('骨骼')" style="background:var(--bg-card);padding:25px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">🦴</div>
+                    <h3 style="margin-top:10px;">骨骼</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">全身骨架，支撑身体</p>
+                </div>
+                <div class="movement-card" onclick="showMovementPart('关节')" style="background:var(--bg-card);padding:25px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">🔗</div>
+                    <h3 style="margin-top:10px;">关节</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">连接骨骼，实现弯曲</p>
+                </div>
+                <div class="movement-card" onclick="showMovementPart('肌肉')" style="background:var(--bg-card);padding:25px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">💪</div>
+                    <h3 style="margin-top:10px;">肌肉</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">收缩产生拉力</p>
+                </div>
+            </div>
+            <div style="background:var(--bg-card);padding:20px;border-radius:16px;margin-top:15px;">
+                <h4 style="margin-bottom:10px;">⚙️ 运动原理：</h4>
+                <p style="color:var(--text-secondary);">大脑发出指令 → 神经传递信号 → 肌肉收缩变短 → 拉动骨骼 → 完成动作</p>
+            </div>
+        </div>
+
+        <!-- 消化系统 -->
+        <div id="human-digestive" class="human-content">
+            <h3 style="margin-bottom:20px;">🍽️ 消化系统</h3>
+            <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+                <div>
+                    <svg viewBox="0 0 160 320" style="width:140px;flex-shrink:0;display:block;">
+                        <!-- 口腔 -->
+                        <ellipse cx="80" cy="25" rx="28" ry="18" fill="#f87171" onclick="showDigestStep('mouth')" style="cursor:pointer;"/>
+                        <text x="62" y="29" fill="white" font-size="11" font-weight="bold">口腔</text>
+                        <!-- 食道 -->
+                        <rect x="72" y="43" width="16" height="40" rx="6" fill="#fca5a5" onclick="showDigestStep('esophagus')" style="cursor:pointer;"/>
+                        <text x="96" y="65" fill="#fca5a5" font-size="10">食道</text>
+                        <!-- 胃 -->
+                        <ellipse cx="85" cy="115" rx="38" ry="30" fill="#f97316" onclick="showDigestStep('stomach')" style="cursor:pointer;"/>
+                        <text x="68" y="119" fill="white" font-size="12" font-weight="bold">胃</text>
+                        <!-- 小肠 -->
+                        <path d="M80 145 C40 155 40 175 80 185 C120 195 120 215 80 225 C40 235 40 250 80 255" stroke="#fb923c" stroke-width="12" fill="none" onclick="showDigestStep('intestine')" style="cursor:pointer;"/>
+                        <text x="110" y="205" fill="#fb923c" font-size="10">小肠</text>
+                        <!-- 大肠 -->
+                        <path d="M80 255 C90 270 100 278 85 290" stroke="#92400e" stroke-width="10" fill="none" onclick="showDigestStep('large-intestine')" style="cursor:pointer;"/>
+                        <text x="98" y="280" fill="#92400e" font-size="10">大肠</text>
+                    </svg>
+                </div>
+                <div style="flex:1;min-width:200px;">
+                    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:15px;">
+                        <button onclick="showDigestStep('mouth')" class="digest-step" style="background:rgba(248,113,113,0.2);border:1px solid #f87171;color:#f87171;padding:10px 15px;border-radius:12px;cursor:pointer;text-align:left;">👄 口腔 — 物理+化学消化</button>
+                        <button onclick="showDigestStep('esophagus')" class="digest-step" style="background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-secondary);padding:10px 15px;border-radius:12px;cursor:pointer;text-align:left;">📍 食道 — 输送通道</button>
+                        <button onclick="showDigestStep('stomach')" class="digest-step" style="background:rgba(249,115,22,0.2);border:1px solid #f97316;color:#f97316;padding:10px 15px;border-radius:12px;cursor:pointer;text-align:left;">👝 胃 — 研磨消化</button>
+                        <button onclick="showDigestStep('intestine')" class="digest-step" style="background:rgba(251,146,60,0.2);border:1px solid #fb923c;color:#fb923c;padding:10px 15px;border-radius:12px;cursor:pointer;text-align:left;">🔄 小肠 — 主要吸收场所 ⭐</button>
+                        <button onclick="showDigestStep('large-intestine')" class="digest-step" style="background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-secondary);padding:10px 15px;border-radius:12px;cursor:pointer;text-align:left;">🟤 大肠 — 吸收水分</button>
+                    </div>
+                    <div style="background:rgba(251,146,60,0.15);border:1px solid #fb923c;padding:12px;border-radius:10px;">
+                        <strong style="color:#fb923c;">⭐ 重点：</strong><span style="color:var(--text-secondary);">小肠是消化和吸收的主要场所</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 呼吸系统 -->
+        <div id="human-respiratory" class="human-content">
+            <h3 style="margin-bottom:20px;">🫁 呼吸系统</h3>
+            <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:200px;">
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                        <div onclick="showRespPart('nose')" class="resp-part" style="background:var(--bg-card);padding:15px;border-radius:12px;cursor:pointer;border-left:4px solid #22c55e;transition:all 0.3s;">
+                            <strong>👃 鼻咽喉</strong>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:5px;">气体进出通道，温润、清洁空气</p>
+                        </div>
+                        <div onclick="showRespPart('trachea')" class="resp-part" style="background:var(--bg-card);padding:15px;border-radius:12px;cursor:pointer;border-left:4px solid #06b6d4;transition:all 0.3s;">
+                            <strong>📯 气管</strong>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:5px;">输送空气到肺部，有纤毛清除灰尘</p>
+                        </div>
+                        <div onclick="showRespPart('bronchus')" class="resp-part" style="background:var(--bg-card);padding:15px;border-radius:12px;cursor:pointer;border-left:4px solid #8b5cf6;transition:all 0.3s;">
+                            <strong>🌳 支气管</strong>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:5px;">分左右两支进入肺部</p>
+                        </div>
+                        <div onclick="showRespPart('lung')" class="resp-part" style="background:var(--bg-card);padding:15px;border-radius:12px;cursor:pointer;border-left:4px solid #f472b6;transition:all 0.3s;">
+                            <strong>🫁 肺部</strong>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:5px;">气体交换核心器官，肺泡完成O₂和CO₂交换</p>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex:1;min-width:200px;">
+                    <div style="background:rgba(34,197,94,0.1);border:1px solid #22c55e;padding:20px;border-radius:16px;margin-bottom:15px;">
+                        <h4 style="color:var(--accent-green);margin-bottom:10px;">吸气过程：</h4>
+                        <p style="color:var(--text-secondary);font-size:0.9rem;">外界空气 → 鼻 → 咽喉 → 气管 → 支气管 → 肺（氧气进入血液）</p>
+                    </div>
+                    <div style="background:rgba(239,68,68,0.1);border:1px solid #ef4444;padding:20px;border-radius:16px;">
+                        <h4 style="color:var(--accent-red);margin-bottom:10px;">呼气过程：</h4>
+                        <p style="color:var(--text-secondary);font-size:0.9rem;">体内CO₂ → 肺 → 支气管 → 气管 → 咽喉 → 鼻 → 外界</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 循环系统 -->
+        <div id="human-circulatory" class="human-content">
+            <h3 style="margin-bottom:20px;">❤️ 循环系统</h3>
+            <div style="display:flex;gap:15px;flex-wrap:wrap;">
+                <div onclick="showCirculatoryPart('heart')" class="vessel" style="background:rgba(239,68,68,0.15);border:2px solid #ef4444;padding:20px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">💓</div>
+                    <h3 style="color:var(--accent-red);margin-top:8px;">心脏</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">血液动力泵</p>
+                </div>
+                <div onclick="showCirculatoryPart('artery')" class="vessel" style="background:rgba(239,68,68,0.1);border:2px solid #f87171;padding:20px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">🔴</div>
+                    <h3 style="color:#f87171;margin-top:8px;">动脉</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">输送含氧血液</p>
+                </div>
+                <div onclick="showCirculatoryPart('vein')" class="vessel" style="background:rgba(59,130,246,0.1);border:2px solid #60a5fa;padding:20px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">🔵</div>
+                    <h3 style="color:#60a5fa;margin-top:8px;">静脉</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">回收含废血液</p>
+                </div>
+                <div onclick="showCirculatoryPart('capillary')" class="vessel" style="background:rgba(245,158,11,0.1);border:2px solid #f59e0b;padding:20px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">🕸️</div>
+                    <h3 style="color:var(--accent-orange);margin-top:8px;">毛细血管</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">营养物质交换</p>
+                </div>
+            </div>
+            <div style="background:var(--bg-card);padding:20px;border-radius:16px;margin-top:15px;">
+                <h4 style="margin-bottom:12px;">🔄 血液循环路径：</h4>
+                <p style="color:var(--accent-red);font-size:0.9rem;margin-bottom:8px;">体循环：左心室 → 主动脉 → 全身 → 上下腔静脉 → 右心房</p>
+                <p style="color:#60a5fa;font-size:0.9rem;">肺循环：右心室 → 肺动脉 → 肺部 → 肺静脉 → 左心房</p>
+            </div>
+        </div>
+
+        <!-- 神经系统 -->
+        <div id="human-nervous" class="human-content">
+            <h3 style="margin-bottom:20px;">🧠 神经系统</h3>
+            <div style="display:flex;gap:15px;flex-wrap:wrap;">
+                <div onclick="showNervousPart('brain')" style="background:var(--bg-card);padding:25px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">🧠</div>
+                    <h3 style="margin-top:8px;">大脑</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">最高级中枢</p>
+                </div>
+                <div onclick="showNervousPart('spinal')" style="background:var(--bg-card);padding:25px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">📊</div>
+                    <h3 style="margin-top:8px;">脊髓</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">低级中枢，反射中枢</p>
+                </div>
+                <div onclick="showNervousPart('nerves')" style="background:var(--bg-card);padding:25px;border-radius:16px;cursor:pointer;flex:1;min-width:150px;text-align:center;transition:all 0.3s;">
+                    <div style="font-size:3rem;">⚡</div>
+                    <h3 style="margin-top:8px;">神经</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:5px;">遍布全身，传递信号</p>
+                </div>
+            </div>
+            <div style="background:var(--bg-card);padding:20px;border-radius:16px;margin-top:15px;">
+                <h4 style="margin-bottom:10px;">⚡ 神经反射弧：</h4>
+                <p style="color:var(--text-secondary);font-size:0.9rem;">五官接收信号 → 神经传递至大脑 → 大脑分析判断 → 下发指令 → 控制肌肉行动</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== 细胞探秘 ========== -->
+    <section id="cell" class="section">
+        <div class="section-header">
+            <h2>🔬 细胞探秘</h2>
+            <p>探索微观世界的奥秘</p>
+            <button onclick="open3DCell()" style="margin-top:15px;background:linear-gradient(135deg,#22c55e,#06b6d4);border:none;padding:12px 25px;border-radius:25px;color:white;font-size:1rem;cursor:pointer;font-weight:bold;">🎮 查看3D细胞模型</button>
+        </div>
+
+        <div class="cell-toggle">
+            <button class="toggle-btn active" onclick="switchCellType('plant')" id="plantCellBtn">🌿 植物细胞</button>
+            <button class="toggle-btn" onclick="switchCellType('animal')" id="animalCellBtn">🐾 动物细胞</button>
+        </div>
+
+        <!-- 植物细胞 -->
+        <div id="cell-plant" class="cell-content active">
+            <div class="cell-display">
+                <svg viewBox="0 0 300 300" class="cell-svg">
+                    <!-- 细胞壁 -->
+                    <rect x="30" y="30" width="240" height="240" rx="20" fill="none" stroke="#a3e635" stroke-width="8"/>
+                    <!-- 细胞膜 -->
+                    <rect x="40" y="40" width="220" height="220" rx="15" fill="#f0fdf4"/>
+                    <!-- 液泡 -->
+                    <ellipse cx="150" cy="180" rx="70" ry="50" fill="#818cf8" opacity="0.5"/>
+                    <text x="130" y="185" fill="#fff" font-size="11">💧液泡</text>
+                    <!-- 叶绿体 -->
+                    <ellipse cx="80" cy="100" rx="25" ry="12" fill="#22c55e"/>
+                    <ellipse cx="220" cy="120" rx="25" ry="12" fill="#22c55e"/>
+                    <ellipse cx="100" cy="230" rx="25" ry="12" fill="#22c55e"/>
+                    <!-- 线粒体 -->
+                    <ellipse cx="200" cy="200" rx="15" ry="8" fill="#f97316"/>
+                    <ellipse cx="70" cy="180" rx="15" ry="8" fill="#f97316"/>
+                    <!-- 细胞核 -->
+                    <circle cx="130" cy="120" r="35" fill="#f472b6"/>
+                    <circle cx="130" cy="120" r="12" fill="#be185d"/>
+                    <text x="115" y="125" fill="#fff" font-size="10">🎯核</text>
+                    <!-- 细胞质 -->
+                    <text x="60" y="60" fill="#fbbf24" font-size="11">🥣细胞质</text>
+                    <!-- 标注 -->
+                    <text x="250" y="60" fill="#a3e635" font-size="10">🧱壁</text>
+                    <text x="240" y="95" fill="#22c55e" font-size="9">🟢体</text>
+                    <text x="195" y="195" fill="#f97316" font-size="9">⚡粒</text>
+                </svg>
+            </div>
+            <div class="cell-organelles">
+                <h3>🌿 植物细胞结构</h3>
+                <div class="organelle-list">
+                    <div class="organelle-item" onclick="showOrganelle('cell-wall')">
+                        <span class="org-icon" style="background:#a3e635">🧱</span>
+                        <span class="org-name">细胞壁</span>
+                        <span class="org-feature">支撑保护</span>
+                    </div>
+                    <div class="organelle-item" onclick="showOrganelle('cell-membrane')">
+                        <span class="org-icon" style="background:#60a5fa">🥚</span>
+                        <span class="org-name">细胞膜</span>
+                        <span class="org-feature">控制进出</span>
+                    </div>
+                    <div class="organelle-item" onclick="showOrganelle('nucleus')">
+                        <span class="org-icon" style="background:#f472b6">🎯</span>
+                        <span class="org-name">细胞核</span>
+                        <span class="org-feature">控制中心</span>
+                    </div>
+                    <div class="organelle-item" onclick="showOrganelle('cytoplasm')">
+                        <span class="org-icon" style="background:#fbbf24">🥣</span>
+                        <span class="org-name">细胞质</span>
+                        <span class="org-feature">工作场所</span>
+                    </div>
+                    <div class="organelle-item plant-only" onclick="showOrganelle('chloroplast')">
+                        <span class="org-icon" style="background:#22c55e">🟢</span>
+                        <span class="org-name">叶绿体</span>
+                        <span class="org-feature">光合作用</span>
+                    </div>
+                    <div class="organelle-item plant-only" onclick="showOrganelle('vacuole')">
+                        <span class="org-icon" style="background:#818cf8">💧</span>
+                        <span class="org-name">液泡</span>
+                        <span class="org-feature">储存水分</span>
+                    </div>
+                    <div class="organelle-item" onclick="showOrganelle('mitochondria')">
+                        <span class="org-icon" style="background:#f97316">⚡</span>
+                        <span class="org-name">线粒体</span>
+                        <span class="org-feature">提供能量</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 动物细胞 -->
+        <div id="cell-animal" class="cell-content">
+            <div class="cell-display">
+                <svg viewBox="0 0 300 300" class="cell-svg">
+                    <!-- 细胞膜（不规则形状） -->
+                    <ellipse cx="150" cy="150" rx="120" ry="110" fill="#fef3c7" stroke="#60a5fa" stroke-width="4"/>
+                    <!-- 液泡（很小） -->
+                    <circle cx="200" cy="120" r="15" fill="#818cf8" opacity="0.4"/>
+                    <!-- 线粒体 -->
+                    <ellipse cx="100" cy="180" rx="18" ry="10" fill="#f97316"/>
+                    <ellipse cx="180" cy="220" rx="18" ry="10" fill="#f97316"/>
+                    <!-- 细胞核 -->
+                    <circle cx="130" cy="140" r="40" fill="#f472b6"/>
+                    <circle cx="130" cy="140" r="15" fill="#be185d"/>
+                    <text x="115" y="145" fill="#fff" font-size="10">🎯核</text>
+                    <!-- 细胞质 -->
+                    <text x="50" y="100" fill="#fbbf24" font-size="11">🥣细胞质</text>
+                    <!-- 标注 -->
+                    <text x="60" y="60" fill="#60a5fa" font-size="10">🥚膜</text>
+                    <text x="160" y="100" fill="#f97316" font-size="9">⚡粒</text>
+                    <text x="185" y="135" fill="#818cf8" font-size="9">小泡</text>
+                </svg>
+            </div>
+            <div class="cell-organelles">
+                <h3>🐾 动物细胞结构</h3>
+                <div class="organelle-list">
+                    <div class="organelle-item" onclick="showOrganelle('cell-membrane-a')">
+                        <span class="org-icon" style="background:#60a5fa">🥚</span>
+                        <span class="org-name">细胞膜</span>
+                        <span class="org-feature">控制进出</span>
+                    </div>
+                    <div class="organelle-item" onclick="showOrganelle('nucleus-a')">
+                        <span class="org-icon" style="background:#f472b6">🎯</span>
+                        <span class="org-name">细胞核</span>
+                        <span class="org-feature">控制中心</span>
+                    </div>
+                    <div class="organelle-item" onclick="showOrganelle('cytoplasm-a')">
+                        <span class="org-icon" style="background:#fbbf24">🥣</span>
+                        <span class="org-name">细胞质</span>
+                        <span class="org-feature">工作场所</span>
+                    </div>
+                    <div class="organelle-item" onclick="showOrganelle('mitochondria-a')">
+                        <span class="org-icon" style="background:#f97316">⚡</span>
+                        <span class="org-name">线粒体</span>
+                        <span class="org-feature">提供能量</span>
+                    </div>
+                </div>
+                <div class="animal-note">
+                    <p>⚠️ 动物细胞没有：细胞壁、叶绿体、大型中央液泡</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 细胞对比 -->
+        <div class="cell-comparison">
+            <h3>⚖️ 植物细胞 vs 动物细胞对比</h3>
+            <div class="compare-table">
+                <div class="compare-header">
+                    <span>结构</span>
+                    <span>植物细胞</span>
+                    <span>动物细胞</span>
+                </div>
+                <div class="compare-row">
+                    <span>细胞壁</span>
+                    <span class="has">✅ 有</span>
+                    <span class="no">❌ 无</span>
+                </div>
+                <div class="compare-row">
+                    <span>叶绿体</span>
+                    <span class="has">✅ 有</span>
+                    <span class="no">❌ 无</span>
+                </div>
+                <div class="compare-row">
+                    <span>大型液泡</span>
+                    <span class="has">✅ 有</span>
+                    <span class="no">❌ 无</span>
+                </div>
+                <div class="compare-row">
+                    <span>细胞膜</span>
+                    <span class="has">✅ 有</span>
+                    <span class="has">✅ 有</span>
+                </div>
+                <div class="compare-row">
+                    <span>细胞核</span>
+                    <span class="has">✅ 有</span>
+                    <span class="has">✅ 有</span>
+                </div>
+                <div class="compare-row">
+                    <span>线粒体</span>
+                    <span class="has">✅ 有</span>
+                    <span class="has">✅ 有</span>
+                </div>
+            </div>
+            <p class="mistake-tip">💡 【易错】植物根部细胞不见光，不含叶绿体！</p>
+        </div>
+    </section>
+
+    <!-- ========== 生命科学 ========== -->
+    <section id="lifescience" class="section">
+        <div class="section-header">
+            <h2>🌏 生命科学</h2>
+            <p>探索生命的奥秘 — 遗传变异、进化与生物多样性</p>
+        </div>
+        <div class="sub-nav">
+            <button class="sub-nav-btn active" onclick="showLifeSection('heredity')">👨‍👩‍👧 遗传变异</button>
+            <button class="sub-nav-btn" onclick="showLifeSection('evolution')">🦕 生物进化</button>
+            <button class="sub-nav-btn" onclick="showLifeSection('biodiversity')">🌈 生物多样性</button>
+        </div>
+
+        <!-- 遗传与变异 -->
+        <div id="lifescience-heredity" class="life-content active">
+            <div class="heredity-variation">
+                <div class="hv-card" onclick="showHV('heredity')">
+                    <div class="hv-icon">📋</div>
+                    <h3>遗传</h3>
+                    <p>亲代外形特征传递给后代</p>
+                    <div class="hv-example">子女像父母、双胞胎相似</div>
+                </div>
+                <div class="hv-vs">⚡</div>
+                <div class="hv-card" onclick="showHV('variation')">
+                    <div class="hv-icon">🎨</div>
+                    <h3>变异</h3>
+                    <p>同种生物个体存在差异</p>
+                    <div class="hv-example">同种苹果大小颜色不同</div>
+                </div>
+            </div>
+            <div class="hv-explanation">
+                <p>遗传和变异是生物多样性的基础。遗传保留了物种的基本特征，变异则产生了新的特征，二者共同推动生物演化。</p>
+                <div class="evolution-flow">
+                    <span>遗传</span>
+                    <span class="arrow">+</span>
+                    <span>变异</span>
+                    <span class="arrow">=</span>
+                    <span class="result">生物演化</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 生物进化 -->
+        <div id="lifescience-evolution" class="life-content">
+            <div class="fossil-evidence">
+                <h3>🪨 化石证据</h3>
+                <p>化石是生物进化的直接证据。通过化石，我们可以了解古代生物的样子。</p>
+                <div class="fossil-formation">
+                    <div class="formation-step">
+                        <span class="step-icon">🦕</span>
+                        <span>生物死亡</span>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="formation-step">
+                        <span class="step-icon">🏜️</span>
+                        <span>泥沙掩埋</span>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="formation-step">
+                        <span class="step-icon">⏰</span>
+                        <span>千万年石化</span>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="formation-step">
+                        <span class="step-icon">🪨</span>
+                        <span>化石形成</span>
+                    </div>
+                </div>
+            </div>
+            <div class="evolution-patterns">
+                <h3>📈 进化规律</h3>
+                <div class="pattern-arrows">
+                    <div class="pattern-row">
+                        <span>结构</span>
+                        <span class="pattern-arrow">简单 → 复杂</span>
+                    </div>
+                    <div class="pattern-row">
+                        <span>环境</span>
+                        <span class="pattern-arrow">水生 → 陆生</span>
+                    </div>
+                    <div class="pattern-row">
+                        <span>等级</span>
+                        <span class="pattern-arrow">低等 → 高等</span>
+                    </div>
+                </div>
+            </div>
+            <div class="natural-selection">
+                <h3>🏆 自然选择（适者生存）</h3>
+                <p>环境改变后，拥有适配特征的生物能存活繁衍，无法适应的生物逐渐灭绝。</p>
+                <div class="selection-examples">
+                    <div class="selection-card">
+                        <span>🦒</span>
+                        <p>长颈鹿长脖子取食高处树叶</p>
+                    </div>
+                    <div class="selection-card">
+                        <span>🦋</span>
+                        <p>桦尺蛾体色伪装躲避鸟类</p>
+                    </div>
+                    <div class="selection-card">
+                        <span>🐆</span>
+                        <p>猎豹速度快追捕瞪羚</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 生物多样性 -->
+        <div id="lifescience-biodiversity" class="life-content">
+            <div class="biodiversity-meanings">
+                <h3>🌈 生物多样性</h3>
+                <div class="bio-meanings">
+                    <div class="bio-card">
+                        <span class="bio-icon">🐟</span>
+                        <h4>物种多样</h4>
+                        <p>地球上有数百万种不同的生物</p>
+                    </div>
+                    <div class="bio-card">
+                        <span class="bio-icon">🐟🐠</span>
+                        <h4>个体多样</h4>
+                        <p>同种生物的每个个体都不完全相同</p>
+                    </div>
+                    <div class="bio-card">
+                        <span class="bio-icon">🌍</span>
+                        <h4>环境多样</h4>
+                        <p>生物生活在各种不同的环境中</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bio-value">
+                <h3>💎 生物多样性的价值</h3>
+                <ul class="value-list">
+                    <li>🌿 植物制造氧气</li>
+                    <li>🍎 动植物提供食物、药材</li>
+                    <li>💧 调节水土气候</li>
+                    <li>⚖️ 维持生态平衡</li>
+                </ul>
+            </div>
+            <div class="bio-protection">
+                <h3>🛡️ 保护生物多样性</h3>
+                <div class="protection-actions">
+                    <div class="action-card">
+                        <span class="action-icon">🏞️</span>
+                        <p>建立自然保护区</p>
+                    </div>
+                    <div class="action-card">
+                        <span class="action-icon">🚫🪓</span>
+                        <p>禁止乱砍滥伐</p>
+                    </div>
+                    <div class="action-card">
+                        <span class="action-icon">🚫🔫</span>
+                        <p>禁止捕杀野生动物</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== 虚拟实验 ========== -->
+    <section id="experiment" class="section">
+        <div class="section-header">
+            <h2>🧪 虚拟实验室</h2>
+            <p>动手做实验，学习更有趣！</p>
+        </div>
+        <div class="experiments-grid">
+            <div class="experiment-card" onclick="startExperiment('organ-match')">
+                <div class="exp-icon">🌿</div>
+                <h3>植物器官识别</h3>
+                <p>将植物器官拖到正确位置</p>
+                <div class="exp-difficulty">⭐ 简单</div>
+                <button class="exp-btn">开始实验</button>
+            </div>
+            <div class="experiment-card" onclick="startExperiment('animal-quiz')">
+                <div class="exp-icon">🐛</div>
+                <h3>动物分类挑战</h3>
+                <p>判断动物属于哪一类</p>
+                <div class="exp-difficulty">⭐⭐ 中等</div>
+                <button class="exp-btn">开始实验</button>
+            </div>
+            <div class="experiment-card" onclick="startExperiment('cell-build')">
+                <div class="exp-icon">🔬</div>
+                <h3>细胞结构搭建</h3>
+                <p>为细胞添加正确结构</p>
+                <div class="exp-difficulty">⭐⭐ 中等</div>
+                <button class="exp-btn">开始实验</button>
+            </div>
+            <div class="experiment-card" onclick="startExperiment('ecosystem-chain')">
+                <div class="exp-icon">🌍</div>
+                <h3>生态链构建</h3>
+                <p>排列生态系统中的位置</p>
+                <div class="exp-difficulty">⭐⭐⭐ 困难</div>
+                <button class="exp-btn">开始实验</button>
+            </div>
+            <div class="experiment-card" onclick="startExperiment('body-system')">
+                <div class="exp-icon">🧍</div>
+                <h3>人体系统配对</h3>
+                <p>将器官与系统匹配</p>
+                <div class="exp-difficulty">⭐⭐ 中等</div>
+                <button class="exp-btn">开始实验</button>
+            </div>
+            <div class="experiment-card" onclick="startExperiment('photosynthesis')">
+                <div class="exp-icon">☀️</div>
+                <h3>光合作用实验</h3>
+                <p>探究光合作用的条件</p>
+                <div class="exp-difficulty">⭐⭐⭐ 困难</div>
+                <button class="exp-btn">开始实验</button>
+            </div>
+        </div>
+
+        <!-- 实验工作区 -->
+        <div class="lab-workspace" id="labWorkspace" style="display:none;">
+            <button class="back-btn" onclick="closeExperiment()">← 返回实验列表</button>
+            <div class="lab-content" id="labContent"></div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>🧬 生物知识可视化平台 — 小学科学1-6年级全覆盖</p>
+            <p>交互学习 | 游戏化 | 语音朗读 | 适合全年龄</p>
+        </div>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+    function open3DCell() {
+        window.open('3d-cell.html', '_blank', 'width=1200,height=800');
+    }
+
+    // 修复 showSeedPart 显示到正确容器
+    window.showSeedPart = function(partId) {
+        var seed = BIO_DATA && BIO_DATA.plant && BIO_DATA.plant.sections['seed-structure'];
+        var part = seed ? seed.hotspots.find(function(h){ return h.id === partId; }) : null;
+        var el = document.getElementById('seedPartFacts');
+        if (el) {
+            if (part) {
+                el.innerHTML = '<h3>' + part.icon + ' ' + part.name + '</h3><ul style="color:var(--text-secondary);padding-left:20px;margin-top:8px;">' + part.facts.map(function(f){ return '<li>' + f + '</li>'; }).join('') + '</ul>';
+                if (typeof speak === 'function') speak(part.name + '：' + part.facts.join('。'));
+            } else {
+                el.innerHTML = '<p style="color:var(--text-secondary);">暂无数据</p>';
+            }
+        }
+        if (typeof recordKnowledgeView === 'function') recordKnowledgeView('plant', 'seed_' + partId);
+    };
+    var _origShowFishPart = typeof showFishPart === 'function' ? showFishPart : null;
+    window.showFishPart = function(partId) {
+        if (_origShowFishPart) _origShowFishPart(partId);
+        var messages = {
+            gill: { name: '鳃', facts: ['呼吸器官，只能在水中提取氧气', '离水会窒息', '鳃丝含有丰富血管'] },
+            fin:  { name: '鱼鳍', facts: ['胸鳍、背鳍、尾鳍', '控制平衡、游动方向', '不同鱼鳍功能不同'] },
+            scale:{ name: '鳞片', facts: ['覆盖全身，保护肉体', '减少水中擦伤', '鳞片上有年轮可判断年龄'] }
+        };
+        var msg = messages[partId];
+        if (!msg) return;
+        var el = document.getElementById('fishKnowledge');
+        if (el) {
+            el.innerHTML = '<h3>🐟 ' + msg.name + '</h3><ul style="color:var(--text-secondary);padding-left:20px;margin-top:8px;">' + msg.facts.map(function(f){ return '<li>' + f + '</li>'; }).join('') + '</ul>';
+        }
+    };
+
+    // 修复 adaptationInfo 显示
+    window.showAdaptation = function(plant) {
+        var plants = {
+            '仙人掌': { icon: '🌵', habitat: '沙漠环境', adaptations: ['叶片退化成尖刺，减少水分蒸发', '肉质茎储存大量水分', '根系发达，吸收深层地下水'] },
+            '浮萍':   { icon: '🌿', habitat: '浅水环境', adaptations: ['叶片宽大，利于光合作用', '根系短小，不需要深扎泥土', '漂浮水面，获取充足阳光'] },
+            '松树':   { icon: '🌲', habitat: '寒冷山地', adaptations: ['针状叶片，耐寒能力强', '减少水分蒸腾', '常绿，一年四季可光合作用'] }
+        };
+        var p = plants[plant];
+        if (!p) return;
+        var el = document.getElementById('adaptationInfo');
+        if (el) {
+            el.innerHTML = '<h3>' + p.icon + ' ' + plant + ' — ' + p.habitat + '</h3><ul style="color:var(--text-secondary);padding-left:20px;margin-top:10px;">' + p.adaptations.map(function(a){ return '<li>' + a + '</li>'; }).join('') + '</ul>';
+        }
+        if (typeof speak === 'function') speak(plant + '适应' + p.habitat + '：' + p.adaptations.join('。'));
+        if (typeof recordKnowledgeView === 'function') recordKnowledgeView('plant', 'adapt_' + plant);
+    };
+
+    // 修复 showSilkStage 显示
+    window.showSilkStage = function(index) {
+        var stages = [
+            { icon: '🥚', name: '卵', detail: '蚕卵很小，颜色会随时间变化，孵化需要适宜温度（25°C左右）' },
+            { icon: '🐛', name: '幼虫（蚕）', detail: '幼虫主食桑叶，不断进食后多次蜕皮，身体逐渐长大' },
+            { icon: '🫧', name: '蛹（茧内）', detail: '幼虫成熟后吐丝结茧，茧内身体转化为蛹，静止但内部器官重组' },
+            { icon: '🦋', name: '成虫（蚕蛾）', detail: '蛹羽化变为蚕蛾，成虫不吃食物，仅完成交配和产卵后死亡' }
+        ];
+        var stage = stages[index];
+        if (!stage) return;
+        var titleEl = document.getElementById('silkStageTitle');
+        var detailEl = document.getElementById('silkStageDetail');
+        if (titleEl) titleEl.textContent = stage.icon + ' ' + stage.name;
+        if (detailEl) detailEl.textContent = stage.detail;
+        if (typeof speak === 'function') speak(stage.name + '：' + stage.detail);
+        if (typeof recordKnowledgeView === 'function') recordKnowledgeView('animal', 'silk_' + index);
+    };
+    </script>
+</body>
+</html>
