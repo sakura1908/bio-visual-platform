@@ -8,6 +8,7 @@ let gameState = {
     knowledgeViewed: new Set(),
     experimentsCompleted: [],
     audioEnabled: true,
+    isAudioPaused: false,
     currentSection: 'home',
     favorites: [],
     notes: '',
@@ -19,7 +20,7 @@ let gameState = {
         human: { viewed: 0, total: 18 },
         cell: { viewed: 0, total: 8 },
         lifescience: { viewed: 0, total: 6 },
-        experiment: { viewed: 0, total: 6 }
+        experiment: { viewed: 0, total: 7 }
     }
 };
 
@@ -32,6 +33,17 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     updateProgressUI();
     loadNotes();
+    updateAudioButtonState();
+    initOnboarding();
+    
+    // 切换浏览器标签页时暂停朗读，避免离开页面后仍继续播放
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+            gameState.isAudioPaused = true;
+            updateAudioButtonState();
+        }
+    });
 });
 
 // 从localStorage加载游戏状态
@@ -66,7 +78,59 @@ function initNavigation() {
     });
 }
 
+// ===== 新手引导 =====
+let currentOnboardingStep = 1;
+const totalOnboardingSteps = 4;
+
+function initOnboarding() {
+    const hasSeen = localStorage.getItem('bioLearnOnboardingSeen');
+    if (hasSeen) return;
+    
+    // 延迟一点显示，让页面先加载完成
+    setTimeout(() => {
+        const overlay = document.getElementById('onboardingOverlay');
+        if (overlay) overlay.style.display = 'flex';
+    }, 800);
+}
+
+function showOnboardingStep(step) {
+    document.querySelectorAll('.onboarding-step').forEach(s => s.classList.remove('active'));
+    const target = document.querySelector('.onboarding-step[data-step="' + step + '"]');
+    if (target) target.classList.add('active');
+    currentOnboardingStep = step;
+}
+
+function nextOnboardingStep() {
+    if (currentOnboardingStep < totalOnboardingSteps) {
+        showOnboardingStep(currentOnboardingStep + 1);
+    } else {
+        finishOnboarding();
+    }
+}
+
+function prevOnboardingStep() {
+    if (currentOnboardingStep > 1) {
+        showOnboardingStep(currentOnboardingStep - 1);
+    }
+}
+
+function skipOnboarding() {
+    const overlay = document.getElementById('onboardingOverlay');
+    if (overlay) overlay.style.display = 'none';
+    localStorage.setItem('bioLearnOnboardingSeen', 'true');
+}
+
+function finishOnboarding() {
+    skipOnboarding();
+    showToast('🎉 开始你的生物探索之旅吧！');
+}
+
 function switchSection(sectionId) {
+    // 切换板块时停止当前朗读，避免跨板块音频继续播放
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    gameState.isAudioPaused = false;
+    updateAudioButtonState();
+    
     // 隐藏所有章节
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     
@@ -428,7 +492,10 @@ function showPlantPart(partId) {
     document.getElementById('plantPartName').textContent = part.name;
     
     const factsHtml = part.facts.map(f => '<li>' + f + '</li>').join('');
-    document.getElementById('plantPartFacts').innerHTML = '<ul>' + factsHtml + '</ul>';
+    // 附图：为花、根、茎提供教材风格 SVG 结构示意图
+    const diagram = getPlantDiagram(partId);
+    const diagramHtml = diagram ? '<div class="plant-diagram">' + diagram + '</div>' : '';
+    document.getElementById('plantPartFacts').innerHTML = diagramHtml + '<ul>' + factsHtml + '</ul>';
     
     document.getElementById('plantGradeTags').style.display = 'flex';
     document.getElementById('plantSpeakBtn').style.display = 'inline-block';
@@ -450,6 +517,146 @@ function showPlantPart(partId) {
     speak(part.name + '。' + part.facts.join('。'));
 }
 
+// ============================================================
+// 植物结构 SVG 附图（教材风格示意）
+// 解决问题：开花植物结构缺附图、植物分类对比缺直观图示
+// ============================================================
+function getPlantDiagram(partId) {
+    const diagrams = {
+        flower: `
+            <svg viewBox="0 0 360 280" style="width:100%;max-width:360px;background:linear-gradient(135deg,#f0fdf4,#ecfeff);border-radius:12px;padding:8px;" xmlns="http://www.w3.org/2000/svg">
+                <!-- 萼片（绿色，底层） -->
+                <g stroke="#14532d" stroke-width="2">
+                    <path d="M120 150 Q90 110 110 80 Q140 95 150 140 Z" fill="#22c55e" opacity="0.85"/>
+                    <path d="M240 150 Q270 110 250 80 Q220 95 210 140 Z" fill="#16a34a" opacity="0.85"/>
+                    <path d="M180 165 Q150 130 170 95 Q200 110 195 150 Z" fill="#15803d" opacity="0.8"/>
+                </g>
+                <!-- 花瓣（粉红色） -->
+                <g stroke="#9f1239" stroke-width="2">
+                    <ellipse cx="120" cy="120" rx="42" ry="58" fill="#f472b6" opacity="0.9" transform="rotate(-30 120 120)"/>
+                    <ellipse cx="240" cy="120" rx="42" ry="58" fill="#ec4899" opacity="0.9" transform="rotate(30 240 120)"/>
+                    <ellipse cx="180" cy="85" rx="42" ry="58" fill="#f9a8d4" opacity="0.9"/>
+                    <ellipse cx="145" cy="170" rx="38" ry="54" fill="#f472b6" opacity="0.85" transform="rotate(-70 145 170)"/>
+                    <ellipse cx="215" cy="170" rx="38" ry="54" fill="#ec4899" opacity="0.85" transform="rotate(70 215 170)"/>
+                </g>
+                <!-- 雄蕊（多根，黄色花药+细丝） -->
+                <g stroke="#a16207" stroke-width="1.8">
+                    <line x1="180" y1="140" x2="150" y2="95" />
+                    <line x1="180" y1="140" x2="210" y2="95" />
+                    <line x1="180" y1="140" x2="165" y2="90" />
+                    <line x1="180" y1="140" x2="195" y2="90" />
+                    <circle cx="150" cy="93" r="7" fill="#fde047"/>
+                    <circle cx="210" cy="93" r="7" fill="#facc15"/>
+                    <circle cx="165" cy="88" r="6.5" fill="#fde047"/>
+                    <circle cx="195" cy="88" r="6.5" fill="#facc15"/>
+                </g>
+                <!-- 雌蕊（中央，粗，绿色子房+紫色柱头） -->
+                <g stroke="#581c87" stroke-width="2">
+                    <rect x="173" y="140" width="14" height="48" rx="6" fill="#a3e635"/>
+                    <ellipse cx="180" cy="130" rx="9" ry="14" fill="#c084fc"/>
+                </g>
+                <!-- 子房标注 -->
+                <text x="172" y="208" font-size="11" fill="#581c87" font-weight="bold">子房</text>
+                <!-- 引线 + 标签 -->
+                <g stroke-dasharray="3,2" stroke-width="1.2">
+                    <line x1="100" y1="78" x2="60" y2="48" stroke="#15803d"/>
+                    <line x1="180" y1="60" x2="180" y2="28" stroke="#be185d"/>
+                    <line x1="148" y1="86" x2="92" y2="40" stroke="#a16207"/>
+                    <line x1="186" y1="128" x2="280" y2="110" stroke="#581c87"/>
+                </g>
+                <text x="20" y="44" font-size="12" fill="#15803d" font-weight="bold">萼片</text>
+                <text x="158" y="22" font-size="12" fill="#be185d" font-weight="bold">花瓣</text>
+                <text x="50" y="36" font-size="12" fill="#a16207" font-weight="bold">雄蕊</text>
+                <text x="284" y="108" font-size="12" fill="#581c87" font-weight="bold">雌蕊</text>
+                <!-- 底部说明 -->
+                <text x="180" y="265" font-size="11" fill="#475569" text-anchor="middle">花的结构（剖面示意）</text>
+            </svg>
+        `,
+        root: `
+            <svg viewBox="0 0 360 260" style="width:100%;max-width:360px;background:linear-gradient(135deg,#fef3c7,#fef9c3);border-radius:12px;padding:8px;" xmlns="http://www.w3.org/2000/svg">
+                <!-- 地平线 -->
+                <line x1="20" y1="70" x2="340" y2="70" stroke="#78350f" stroke-width="2"/>
+                <text x="24" y="62" font-size="10" fill="#78350f">地面</text>
+                <!-- 左：直根（桃树） -->
+                <g stroke="#78350f" stroke-width="1.8">
+                    <path d="M90 70 L86 200" stroke-width="6" stroke="#92400e"/>
+                    <path d="M88 110 Q70 135 60 160" fill="none" stroke="#a16207" stroke-width="2"/>
+                    <path d="M88 110 Q106 135 116 160" fill="none" stroke="#a16207" stroke-width="2"/>
+                    <path d="M87 150 Q73 170 66 190" fill="none" stroke="#a16207" stroke-width="1.6"/>
+                    <path d="M87 150 Q101 170 108 190" fill="none" stroke="#a16207" stroke-width="1.6"/>
+                    <path d="M86 180 Q78 195 73 210" fill="none" stroke="#a16207" stroke-width="1.4"/>
+                    <path d="M86 180 Q94 195 99 210" fill="none" stroke="#a16207" stroke-width="1.4"/>
+                </g>
+                <text x="90" y="245" font-size="12" fill="#92400e" font-weight="bold" text-anchor="middle">直根（桃树）</text>
+                <text x="90" y="232" font-size="10" fill="#78350f" text-anchor="middle">一根粗壮主根</text>
+                <!-- 右：须根（水稻） -->
+                <g stroke="#78350f" stroke-width="1.8">
+                    <path d="M260 70 L258 100" stroke-width="3" stroke="#92400e"/>
+                    <path d="M260 95 Q240 120 230 160" fill="none" stroke="#a16207" stroke-width="1.6"/>
+                    <path d="M260 95 Q250 120 244 165" fill="none" stroke="#a16207" stroke-width="1.6"/>
+                    <path d="M260 95 Q272 120 278 165" fill="none" stroke="#a16207" stroke-width="1.6"/>
+                    <path d="M260 95 Q282 118 290 158" fill="none" stroke="#a16207" stroke-width="1.6"/>
+                    <path d="M260 95 Q268 125 270 175" fill="none" stroke="#a16207" stroke-width="1.6"/>
+                    <path d="M230 160 Q226 185 222 205" fill="none" stroke="#a16207" stroke-width="1.4"/>
+                    <path d="M244 165 Q242 188 240 210" fill="none" stroke="#a16207" stroke-width="1.4"/>
+                    <path d="M278 165 Q280 188 282 210" fill="none" stroke="#a16207" stroke-width="1.4"/>
+                    <path d="M290 158 Q294 182 298 205" fill="none" stroke="#a16207" stroke-width="1.4"/>
+                    <path d="M270 175 Q270 195 270 215" fill="none" stroke="#a16207" stroke-width="1.4"/>
+                </g>
+                <text x="260" y="245" font-size="12" fill="#92400e" font-weight="bold" text-anchor="middle">须根（水稻）</text>
+                <text x="260" y="232" font-size="10" fill="#78350f" text-anchor="middle">无主根，细根丛生</text>
+                <!-- 对比箭头 -->
+                <text x="180" y="130" font-size="14" fill="#dc2626" font-weight="bold" text-anchor="middle">VS</text>
+            </svg>
+        `,
+        stem: `
+            <svg viewBox="0 0 360 260" style="width:100%;max-width:360px;background:linear-gradient(135deg,#ecfdf5,#f0fdfa);border-radius:12px;padding:8px;" xmlns="http://www.w3.org/2000/svg">
+                <!-- 1.直立茎 -->
+                <g>
+                    <line x1="50" y1="50" x2="50" y2="200" stroke="#15803d" stroke-width="4"/>
+                    <circle cx="50" cy="45" r="7" fill="#f472b6"/>
+                    <ellipse cx="42" cy="90" rx="10" ry="5" fill="#22c55e" transform="rotate(-30 42 90)"/>
+                    <ellipse cx="58" cy="130" rx="10" ry="5" fill="#22c55e" transform="rotate(30 58 130)"/>
+                    <text x="50" y="225" font-size="10" fill="#15803d" font-weight="bold" text-anchor="middle">直立茎</text>
+                    <text x="50" y="240" font-size="9" fill="#475569" text-anchor="middle">向日葵</text>
+                </g>
+                <!-- 2.缠绕茎 -->
+                <g>
+                    <path d="M110 200 Q100 170 120 150 Q140 130 120 110 Q100 90 120 70 Q140 55 130 45" fill="none" stroke="#166534" stroke-width="3"/>
+                    <circle cx="130" cy="42" r="6" fill="#f472b6"/>
+                    <line x1="95" y1="200" x2="95" y2="50" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3,2"/>
+                    <text x="115" y="225" font-size="10" fill="#166534" font-weight="bold" text-anchor="middle">缠绕茎</text>
+                    <text x="115" y="240" font-size="9" fill="#475569" text-anchor="middle">牵牛花</text>
+                </g>
+                <!-- 3.匍匐茎 -->
+                <g>
+                    <path d="M170 180 Q185 175 200 180 Q215 185 230 180 Q245 175 260 180" fill="none" stroke="#15803d" stroke-width="3"/>
+                    <circle cx="180" cy="178" r="5" fill="#86efac"/>
+                    <circle cx="210" cy="178" r="5" fill="#86efac"/>
+                    <circle cx="240" cy="178" r="5" fill="#86efac"/>
+                    <line x1="180" y1="183" x2="178" y2="200" stroke="#a16207" stroke-width="1.5"/>
+                    <line x1="210" y1="183" x2="210" y2="200" stroke="#a16207" stroke-width="1.5"/>
+                    <line x1="240" y1="183" x2="242" y2="200" stroke="#a16207" stroke-width="1.5"/>
+                    <text x="215" y="225" font-size="10" fill="#15803d" font-weight="bold" text-anchor="middle">匍匐茎</text>
+                    <text x="215" y="240" font-size="9" fill="#475569" text-anchor="middle">红薯</text>
+                </g>
+                <!-- 4.变态储存茎 -->
+                <g>
+                    <ellipse cx="310" cy="180" rx="22" ry="16" fill="#fbbf24" stroke="#a16207" stroke-width="2"/>
+                    <circle cx="295" cy="180" r="2.5" fill="#92400e"/>
+                    <circle cx="305" cy="174" r="2.5" fill="#92400e"/>
+                    <circle cx="318" cy="186" r="2.5" fill="#92400e"/>
+                    <line x1="310" y1="164" x2="310" y2="145" stroke="#15803d" stroke-width="2"/>
+                    <ellipse cx="304" cy="150" rx="6" ry="3" fill="#22c55e"/>
+                    <text x="310" y="225" font-size="10" fill="#a16207" font-weight="bold" text-anchor="middle">变态储存茎</text>
+                    <text x="310" y="240" font-size="9" fill="#475569" text-anchor="middle">土豆</text>
+                </g>
+            </svg>
+        `
+    };
+    return diagrams[partId] || '';
+}
+
 function speakPlantFacts() {
     const name = document.getElementById('plantPartName').textContent;
     const facts = Array.from(document.querySelectorAll('#plantPartFacts li')).map(l => l.textContent);
@@ -458,8 +665,12 @@ function speakPlantFacts() {
 
 function speak(text) {
     if (!gameState.audioEnabled) return;
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
     if (!('speechSynthesis' in window)) return;
+    
+    // 停止旧朗读，准备播放新内容
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    gameState.isAudioPaused = false;
+    updateAudioButtonState();
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'zh-CN';
@@ -471,7 +682,12 @@ function speak(text) {
     const chineseVoice = voices.find(v => v.lang.includes('zh'));
     if (chineseVoice) utterance.voice = chineseVoice;
     
+    // 朗读结束时更新按钮状态
+    utterance.onend = () => updateAudioButtonState();
+    utterance.onerror = () => updateAudioButtonState();
+    
     window.speechSynthesis.speak(utterance);
+    updateAudioButtonState(); // 立即显示为播放中
 }
 
 function showSeedPart(partId) {
@@ -767,6 +983,7 @@ function startExperiment(expId) {
     let html = '';
     
     switch(expId) {
+        case 'seed-germination': html = createSeedGerminationGame(); break;
         case 'organ-match': html = createOrganMatchGame(); break;
         case 'animal-quiz': html = createAnimalQuizGame(); break;
         case 'cell-build': html = createCellBuildGame(); break;
@@ -783,13 +1000,96 @@ function closeExperiment() {
     document.getElementById('labWorkspace').style.display = 'none';
 }
 
+// ===== 种子萌发实验室（入门实验） =====
+function createSeedGerminationGame() {
+    // 重置条件
+    seedConditions = { water: false, temp: false, air: false };
+    return `
+        <h3>🌱 种子萌发实验室</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">小科学家，请为种子选择萌发需要的三个条件</p>
+        <div class="seed-lab">
+            <div class="seed-stage" id="seedStage">
+                <div class="big-seed">🌰</div>
+                <div class="seed-status" id="seedStatus">种子正在睡觉...</div>
+            </div>
+            <div class="condition-cards">
+                <div class="condition-card" id="cond-water" onclick="toggleCondition('water')">
+                    <div class="cond-icon">💧</div>
+                    <div class="cond-name">水分</div>
+                    <div class="cond-state" id="state-water">未添加</div>
+                </div>
+                <div class="condition-card" id="cond-temp" onclick="toggleCondition('temp')">
+                    <div class="cond-icon">🌡️</div>
+                    <div class="cond-name">适宜温度</div>
+                    <div class="cond-state" id="state-temp">未添加</div>
+                </div>
+                <div class="condition-card" id="cond-air" onclick="toggleCondition('air')">
+                    <div class="cond-icon">💨</div>
+                    <div class="cond-name">空气</div>
+                    <div class="cond-state" id="state-air">未添加</div>
+                </div>
+            </div>
+            <button class="check-btn" id="germinateBtn" onclick="checkSeedGermination()">🔬 开始萌发</button>
+            <div class="germination-result" id="germinationResult"></div>
+        </div>
+    `;
+}
+
+function toggleCondition(type) {
+    seedConditions[type] = !seedConditions[type];
+    const card = document.getElementById('cond-' + type);
+    const state = document.getElementById('state-' + type);
+    if (seedConditions[type]) {
+        card.classList.add('active');
+        state.textContent = '已添加 ✓';
+        state.style.color = 'var(--accent-green)';
+        playSound('click');
+    } else {
+        card.classList.remove('active');
+        state.textContent = '未添加';
+        state.style.color = 'var(--text-secondary)';
+    }
+}
+
+function checkSeedGermination() {
+    const resultEl = document.getElementById('germinationResult');
+    const statusEl = document.getElementById('seedStatus');
+    const seedEl = document.querySelector('.big-seed');
+
+    const allReady = seedConditions.water && seedConditions.temp && seedConditions.air;
+    const missing = [];
+    if (!seedConditions.water) missing.push('水分');
+    if (!seedConditions.temp) missing.push('适宜温度');
+    if (!seedConditions.air) missing.push('空气');
+
+    if (allReady) {
+        statusEl.textContent = '种子萌发啦！🌱';
+        seedEl.textContent = '🌱';
+        seedEl.style.animation = 'seedGrow 0.8s ease forwards';
+        resultEl.innerHTML = '<div class="result-success">🎉 太棒了！种子萌发需要：水分 + 适宜温度 + 充足空气</div>';
+        showToast('🎉 实验成功！');
+        addXP(BIO_DATA.game.xpRewards.completeExperiment, '完成种子萌发实验');
+        recordKnowledgeView('experiment', 'seed-germination');
+        if (!gameState.experimentsCompleted.includes('seed-germination')) {
+            gameState.experimentsCompleted.push('seed-germination');
+        }
+        checkBadges();
+        updateProgressUI();
+    } else {
+        statusEl.textContent = '条件还不够...';
+        seedEl.textContent = '🌰';
+        resultEl.innerHTML = '<div class="result-hint">💡 还缺少：' + missing.join('、') + '</div>';
+        speak('种子萌发需要水分、适宜的温度和空气，还缺少' + missing.join('、'));
+    }
+}
+
 function createOrganMatchGame() {
     const items = [
-        { term: '固定植物', answer: '根', icon: '🌿' },
-        { term: '运输通道', answer: '茎', icon: '🎋' },
-        { term: '光合作用', answer: '叶', icon: '🍃' },
-        { term: '繁殖器官', answer: '花', icon: '🌺' },
-        { term: '保护种子', answer: '果实', icon: '🍎' }
+        { term: '把植物固定在土里', answer: '根', icon: '🌿' },
+        { term: '运输水分和营养', answer: '茎', icon: '🎋' },
+        { term: '吸收阳光制造食物', answer: '叶', icon: '🍃' },
+        { term: '吸引昆虫帮助繁殖', answer: '花', icon: '🌺' },
+        { term: '保护里面的种子', answer: '果实', icon: '🍎' }
     ];
     
     const shuffled = [...items].sort(() => Math.random() - 0.5);
@@ -1218,16 +1518,46 @@ function renderBadges() {
 }
 
 function toggleAudio() {
-    gameState.audioEnabled = !gameState.audioEnabled;
+    const isSpeaking = window.speechSynthesis && window.speechSynthesis.speaking;
     
-    const btn = document.getElementById('audioBtn');
-    if (btn) {
-        btn.textContent = gameState.audioEnabled ? '🔊' : '🔇';
-        btn.classList.toggle('muted', !gameState.audioEnabled);
+    if (isSpeaking) {
+        // 正在朗读，点击则暂停
+        window.speechSynthesis.cancel();
+        gameState.isAudioPaused = true;
+    } else {
+        // 未在朗读，切换全局语音开关
+        gameState.isAudioPaused = false;
+        gameState.audioEnabled = !gameState.audioEnabled;
     }
     
-    if (!gameState.audioEnabled && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
+    updateAudioButtonState();
+    saveGameState();
+}
+
+function updateAudioButtonState() {
+    const btn = document.getElementById('audioBtn');
+    if (!btn) return;
+    
+    const isSpeaking = window.speechSynthesis && window.speechSynthesis.speaking;
+    
+    // 清除旧状态类
+    btn.classList.remove('playing', 'paused', 'muted');
+    
+    if (isSpeaking) {
+        btn.textContent = '⏸️';
+        btn.title = '点击暂停朗读';
+        btn.classList.add('playing');
+    } else if (gameState.isAudioPaused) {
+        btn.textContent = '▶️';
+        btn.title = '已暂停，继续朗读请去点击内容';
+        btn.classList.add('paused');
+    } else if (!gameState.audioEnabled) {
+        btn.textContent = '🔇';
+        btn.title = '朗读已关闭';
+        btn.classList.add('muted');
+    } else {
+        btn.textContent = '🔊';
+        btn.title = '朗读已开启';
     }
 }
 
