@@ -22,7 +22,7 @@
             <button class="badge-btn" onclick="toggleBadges()">🏅 <span id="badgeCount">0</span>/8</button>
         </div>
         <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="切换主题">🌙</button>
-        <button class="audio-toggle" onclick="toggleAudio()" id="audioBtn">🔊</button>
+        <button class="audio-toggle" onclick="toggleAudio()" id="audioBtn" title="朗读控制">🔊</button>
     </div>
 
     <!-- 搜索栏 -->
@@ -72,13 +72,91 @@
         </div>
     </div>
 
-    <!-- 徽章获得动画 -->
-    <div class="badge-earned" id="badgeEarned" style="display:none;">
-        <div class="badge-earned-content">
-            <div class="badge-icon" id="earnedIcon">🏆</div>
-            <div class="badge-name" id="earnedName">获得新徽章！</div>
+<!-- 徽章获得动画 -->
+<div class="badge-earned" id="badgeEarned" style="display:none;">
+    <div class="badge-earned-content">
+        <div class="badge-icon" id="earnedIcon">🏆</div>
+        <div class="badge-name" id="earnedName">获得新徽章！</div>
+    </div>
+</div>
+
+<!-- 新手引导 -->
+<div class="onboarding-overlay" id="onboardingOverlay" style="display:none;">
+    <div class="onboarding-modal">
+        <div class="onboarding-step active" data-step="1">
+            <div class="onboarding-icon">🧬</div>
+            <h2>欢迎来到生物知识可视化平台！</h2>
+            <p>这里是你的生物学习小助手，用动画、实验和游戏让科学变得超有趣。</p>
+            <div class="onboarding-dots">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+            <div class="onboarding-actions">
+                <button class="btn btn-secondary" onclick="skipOnboarding()">跳过</button>
+                <button class="btn btn-primary" onclick="nextOnboardingStep()">下一步</button>
+            </div>
+        </div>
+        <div class="onboarding-step" data-step="2">
+            <div class="onboarding-icon">🧭</div>
+            <h2>五大学习板块</h2>
+            <p>点击顶部导航，探索植物、动物、人体、细胞和生命科学。每个板块都有互动知识和趣味实验。</p>
+            <div class="onboarding-preview">
+                <span>🌱 植物</span>
+                <span>🐛 动物</span>
+                <span>🧍 人体</span>
+                <span>🔬 细胞</span>
+                <span>🌏 生命</span>
+            </div>
+            <div class="onboarding-dots">
+                <span class="dot"></span>
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+            <div class="onboarding-actions">
+                <button class="btn btn-secondary" onclick="prevOnboardingStep()">上一步</button>
+                <button class="btn btn-primary" onclick="nextOnboardingStep()">下一步</button>
+            </div>
+        </div>
+        <div class="onboarding-step" data-step="3">
+            <div class="onboarding-icon">🎮</div>
+            <h2>边玩边学</h2>
+            <p>完成实验、答题和挑战可以获得 XP 和徽章。点击「做实验」开始你的第一个科学任务吧！</p>
+            <div class="onboarding-preview">
+                <span>🏅 徽章</span>
+                <span>⭐ 等级</span>
+                <span>🧪 实验</span>
+            </div>
+            <div class="onboarding-dots">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot active"></span>
+                <span class="dot"></span>
+            </div>
+            <div class="onboarding-actions">
+                <button class="btn btn-secondary" onclick="prevOnboardingStep()">上一步</button>
+                <button class="btn btn-primary" onclick="nextOnboardingStep()">下一步</button>
+            </div>
+        </div>
+        <div class="onboarding-step" data-step="4">
+            <div class="onboarding-icon">🔊</div>
+            <h2>随时听讲解</h2>
+            <p>点击右上角 🔊 按钮，可以朗读知识点内容。离开页面或切换板块时会自动暂停，很方便哦。</p>
+            <div class="onboarding-dots">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot active"></span>
+            </div>
+            <div class="onboarding-actions">
+                <button class="btn btn-secondary" onclick="skipOnboarding()">跳过</button>
+                <button class="btn btn-primary" onclick="finishOnboarding()">开始探索</button>
+            </div>
         </div>
     </div>
+</div>
 
     <!-- 导航栏 -->
     <nav class="navbar">
@@ -335,33 +413,52 @@
         <!-- 种子结构 -->
         <div id="plant-seed-structure" class="plant-content">
             <div class="seed-knowledge">
-                <h3 style="margin-bottom:20px;font-size:1.3rem;">🌰 种子结构剖面</h3>
+                <h3 style="margin-bottom:20px;font-size:1.3rem;">🌰 种子结构剖面 + 动态萌发演示</h3>
                 <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
-                    <svg viewBox="0 0 260 280" style="width:220px;flex-shrink:0;">
-                        <!-- 种皮 -->
-                        <ellipse cx="130" cy="140" rx="110" ry="130" fill="#92400e" opacity="0.3" stroke="#92400e" stroke-width="3"/>
-                        <!-- 子叶 -->
-                        <ellipse cx="100" cy="150" rx="65" ry="100" fill="#86efac" opacity="0.7"/>
-                        <ellipse cx="160" cy="150" rx="65" ry="100" fill="#86efac" opacity="0.5"/>
-                        <!-- 胚芽 -->
-                        <ellipse cx="130" cy="75" rx="18" ry="25" fill="#4ade80"/>
-                        <text x="118" y="79" fill="white" font-size="11" font-weight="bold">胚芽</text>
-                        <!-- 胚根 -->
-                        <ellipse cx="130" cy="220" rx="15" ry="22" fill="#f97316"/>
-                        <text x="118" y="225" fill="white" font-size="11" font-weight="bold">胚根</text>
-                        <!-- 标注 -->
-                        <text x="10" y="50" fill="#92400e" font-size="13" font-weight="bold" onclick="showSeedPart('seed-coat')" style="cursor:pointer;">🟤 种皮</text>
-                        <text x="155" y="160" fill="#22c55e" font-size="13" font-weight="bold" onclick="showSeedPart('cotyledon')" style="cursor:pointer;">🥜 子叶</text>
-                    </svg>
+                    <div style="position:relative;width:220px;flex-shrink:0;">
+                        <svg id="seedStructureSvg" viewBox="0 0 260 320" style="width:220px;overflow:visible;">
+                            <!-- 种皮 -->
+                            <ellipse class="seed-coat" cx="130" cy="140" rx="110" ry="130" fill="#92400e" opacity="0.35" stroke="#78350f" stroke-width="4"/>
+                            <!-- 子叶 -->
+                            <ellipse class="cotyledon-left" cx="95" cy="150" rx="60" ry="100" fill="#86efac" opacity="0.85" stroke="#166534" stroke-width="2"/>
+                            <ellipse class="cotyledon-right" cx="165" cy="150" rx="60" ry="100" fill="#4ade80" opacity="0.75" stroke="#166534" stroke-width="2"/>
+                            <!-- 胚芽 -->
+                            <ellipse class="plumule" cx="130" cy="70" rx="20" ry="28" fill="#22c55e" stroke="#14532d" stroke-width="2"/>
+                            <text x="115" y="75" fill="white" font-size="11" font-weight="bold">胚芽</text>
+                            <!-- 胚根 -->
+                            <ellipse class="radicle" cx="130" cy="230" rx="16" ry="26" fill="#f97316" stroke="#9a3412" stroke-width="2"/>
+                            <text x="115" y="235" fill="white" font-size="11" font-weight="bold">胚根</text>
+                            <!-- 动态生长胚根（初始隐藏） -->
+                            <path class="growing-root" d="M130,255 Q130,280 130,300" fill="none" stroke="#f97316" stroke-width="6" stroke-linecap="round" opacity="0"/>
+                            <!-- 动态生长胚芽（初始隐藏） -->
+                            <path class="growing-shoot" d="M130,55 Q130,30 130,10" fill="none" stroke="#22c55e" stroke-width="5" stroke-linecap="round" opacity="0"/>
+                            <ellipse class="growing-leaf-left" cx="120" cy="8" rx="8" ry="4" fill="#22c55e" opacity="0"/>
+                            <ellipse class="growing-leaf-right" cx="140" cy="8" rx="8" ry="4" fill="#22c55e" opacity="0"/>
+                            <!-- 标注引线 -->
+                            <line x1="25" y1="50" x2="55" y2="80" stroke="#92400e" stroke-width="1.5" opacity="0.6"/>
+                            <text x="10" y="45" fill="#fbbf24" font-size="13" font-weight="bold" onclick="showSeedPart('seed-coat')" style="cursor:pointer;">🟤 种皮</text>
+                            <line x1="210" y1="160" x2="180" y2="150" stroke="#22c55e" stroke-width="1.5" opacity="0.6"/>
+                            <text x="215" y="165" fill="#86efac" font-size="13" font-weight="bold" onclick="showSeedPart('cotyledon')" style="cursor:pointer;">🥜 子叶</text>
+                            <line x1="170" y1="70" x2="155" y2="70" stroke="#22c55e" stroke-width="1.5" opacity="0.6"/>
+                            <text x="175" y="75" fill="#4ade80" font-size="13" font-weight="bold" onclick="showSeedPart('plumule')" style="cursor:pointer;">🌱 胚芽</text>
+                            <line x1="90" y1="230" x2="115" y2="230" stroke="#f97316" stroke-width="1.5" opacity="0.6"/>
+                            <text x="40" y="235" fill="#fb923c" font-size="13" font-weight="bold" onclick="showSeedPart('radicle')" style="cursor:pointer;">📍 胚根</text>
+                        </svg>
+                        <div style="text-align:center;margin-top:10px;">
+                            <button id="germinationPlayBtn" onclick="playSeedGermination()" style="background:linear-gradient(135deg,var(--accent-green),#10b981);color:white;border:none;padding:10px 20px;border-radius:25px;cursor:pointer;font-size:0.95rem;box-shadow:0 4px 15px rgba(52,211,153,0.3);">
+                                ▶️ 播放萌发过程
+                            </button>
+                        </div>
+                    </div>
                     <div style="flex:1;min-width:200px;">
-                        <div id="seedPartFacts" style="background:var(--bg-card);padding:20px;border-radius:12px;color:var(--text-secondary);">
-                            <p>👆 点击下方标签，了解种子各部分功能</p>
+                        <div id="seedPartFacts" style="background:var(--bg-card);padding:20px;border-radius:12px;color:var(--text-secondary);min-height:120px;">
+                            <p>👆 点击上方种子结构标签或下方按钮，了解种子各部分功能；也可以点击"播放萌发过程"看动态演示</p>
                         </div>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:15px;">
-                            <button onclick="showSeedPart('seed-coat')" style="background:var(--bg-card);border:2px solid #92400e;color:#b45309;padding:8px 15px;border-radius:20px;cursor:pointer;">🟤 种皮</button>
-                            <button onclick="showSeedPart('cotyledon')" style="background:var(--bg-card);border:2px solid #22c55e;color:#22c55e;padding:8px 15px;border-radius:20px;cursor:pointer;">🥜 子叶</button>
-                            <button onclick="showSeedPart('plumule')" style="background:var(--bg-card);border:2px solid #4ade80;color:#4ade80;padding:8px 15px;border-radius:20px;cursor:pointer;">🌱 胚芽</button>
-                            <button onclick="showSeedPart('radicle')" style="background:var(--bg-card);border:2px solid #f97316;color:#f97316;padding:8px 15px;border-radius:20px;cursor:pointer;">📍 胚根</button>
+                            <button onclick="showSeedPart('seed-coat')" style="background:var(--bg-card);border:2px solid #92400e;color:#fbbf24;padding:8px 15px;border-radius:20px;cursor:pointer;transition:all 0.2s;">🟤 种皮</button>
+                            <button onclick="showSeedPart('cotyledon')" style="background:var(--bg-card);border:2px solid #22c55e;color:#86efac;padding:8px 15px;border-radius:20px;cursor:pointer;transition:all 0.2s;">🥜 子叶</button>
+                            <button onclick="showSeedPart('plumule')" style="background:var(--bg-card);border:2px solid #4ade80;color:#4ade80;padding:8px 15px;border-radius:20px;cursor:pointer;transition:all 0.2s;">🌱 胚芽</button>
+                            <button onclick="showSeedPart('radicle')" style="background:var(--bg-card);border:2px solid #f97316;color:#fb923c;padding:8px 15px;border-radius:20px;cursor:pointer;transition:all 0.2s;">📍 胚根</button>
                         </div>
                     </div>
                 </div>
@@ -1244,9 +1341,16 @@
     <section id="experiment" class="section">
         <div class="section-header">
             <h2>🧪 虚拟实验室</h2>
-            <p>动手做实验，学习更有趣！</p>
+            <p>像小科学家一样动手做实验，生物知识更好玩！</p>
         </div>
         <div class="experiments-grid">
+            <div class="experiment-card" onclick="startExperiment('seed-germination')">
+                <div class="exp-icon">🌱</div>
+                <h3>种子萌发实验室</h3>
+                <p>给种子选择合适的环境条件</p>
+                <div class="exp-difficulty">⭐ 入门</div>
+                <button class="exp-btn">开始实验</button>
+            </div>
             <div class="experiment-card" onclick="startExperiment('organ-match')">
                 <div class="exp-icon">🌿</div>
                 <h3>植物器官识别</h3>
@@ -1329,6 +1433,32 @@
             }
         }
         if (typeof recordKnowledgeView === 'function') recordKnowledgeView('plant', 'seed_' + partId);
+    };
+
+    // 播放种子萌发动画
+    window.playSeedGermination = function() {
+        var svg = document.getElementById('seedStructureSvg');
+        var btn = document.getElementById('germinationPlayBtn');
+        if (!svg || !btn) return;
+        
+        // 重置动画
+        svg.classList.remove('germinating');
+        void svg.offsetWidth; // 强制重绘，允许重新播放
+        
+        btn.disabled = true;
+        btn.textContent = '⏳ 萌发中...';
+        
+        // 同步语音讲解
+        var story = '种子萌发了！首先种皮吸水变软，然后胚根向下长成根，接着胚芽向上钻出地面，最后展开子叶。';
+        if (typeof speak === 'function') speak(story);
+        
+        svg.classList.add('germinating');
+        
+        setTimeout(function() {
+            svg.classList.remove('germinating');
+            btn.disabled = false;
+            btn.textContent = '▶️ 再次播放萌发过程';
+        }, 4200);
     };
     var _origShowFishPart = typeof showFishPart === 'function' ? showFishPart : null;
     window.showFishPart = function(partId) {
